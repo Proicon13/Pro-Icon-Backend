@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,9 +13,21 @@ async function bootstrap() {
   .setTitle('Pro-Icon')
   .setDescription('The Pro-Icon API description')
   .setVersion('1.0')
+  .addBearerAuth()
   .build();
 const documentFactory = () => SwaggerModule.createDocument(app, config);
 SwaggerModule.setup('api', app, documentFactory);
+
+// Enable global validation
+app.useGlobalPipes(new ValidationPipe({
+  whitelist: false,        // Strip properties that are not part of the DTO
+  forbidNonWhitelisted: true, // Throw an error if non-whitelisted properties are present
+  transform: true,        // Automatically transform payloads to DTO instances
+  validationError: {
+    target: false,         // Do not expose the raw object in validation errors
+    value: false,          // Do not expose the raw value in validation errors
+  },
+}));
 
   await app.listen(process.env.PORT ?? 3000);
 }
