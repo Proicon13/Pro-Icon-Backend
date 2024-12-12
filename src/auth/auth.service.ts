@@ -39,7 +39,9 @@ export class AuthService {
         console.log('JWT Secret:', process.env.JWT_SECRET); // Debugging to check if the secret is set
   
         // Sign the payload with JWT secret and generate a token
-        const accessToken =  this.jwtService.sign(payload);
+        const accessToken =  await this.jwtService.signAsync(payload, {
+          secret: process.env.JWT_SECRET || 'defaultSecretKey',
+        })
   
         return {
           access_token: accessToken,  // Return the token
