@@ -11,17 +11,47 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService,) {}
 
+
+    //check if user exists
+    async checkUserExists(email: string) {
+      const user = await this.prisma.user.findUnique({ where: { email } });
+      return user !== null;
+    }
     // Create a new user
     async createUser(data: CreateUserDto) {
+
+      if (await this.checkUserExists(data.email)) {
+        throw new BadRequestException('User already exists');
+      }
+
       // Hash the password before saving it
       const hashedPassword = await PasswordService.hashPassword(data.password);
   
-      return await this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data : {
           ...data,
           password: hashedPassword
         },
+        include: {
+          city: {
+            select: {
+              id: true,
+              name: true,
+              country: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
       });
+
+
+      //remove password from response
+      const { password, createdAt, updatedAt, cityId,...result } = user;
+      return result;
     }
   
     // Validate user password during login
