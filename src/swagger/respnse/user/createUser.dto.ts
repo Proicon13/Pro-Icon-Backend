@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { City } from "@prisma/client";
 import { CityResponseDto } from "../lookups/city.dto";
 
 export class UserResponseDto {
@@ -15,7 +14,7 @@ export class UserResponseDto {
   @ApiProperty({ description: "The profile image URL of the user" })
   image: string;
 
-  @ApiProperty({ description: "The city of the user" , type: CityResponseDto})
+  @ApiProperty({ description: "The city of the user", type: CityResponseDto })
   city: CityResponseDto;
 
   @ApiProperty({ description: "The postal code of the user" })
@@ -23,7 +22,6 @@ export class UserResponseDto {
 
   @ApiProperty({ description: "The address of the user" })
   address: string;
-
 
   @ApiProperty({ description: "The phone number of the user" })
   phone: string;
