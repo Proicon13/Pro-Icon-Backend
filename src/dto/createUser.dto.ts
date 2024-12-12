@@ -46,5 +46,11 @@ export class CreateUserDto {
   @ApiProperty({ description: "The city of the user" })
   cityId: number;
 
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({ description: "The phone number of the user" })
+  phone: string;
+
+
   // Remove `name` and `age` if they are not part of your schema
 }
