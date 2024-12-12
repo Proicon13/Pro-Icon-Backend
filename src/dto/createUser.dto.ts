@@ -42,7 +42,6 @@ export class CreateUserDto {
   @ApiProperty({ description: "The postal code of the user" })
   postalCode: string;
 
-  @IsOptional()
   @IsNumber()
   @ApiProperty({ description: "The city of the user" })
   cityId: number;

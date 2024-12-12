@@ -20,8 +20,8 @@ model User {
   postalCode   String?
   phone       String?
   role      Role     @default(ADMIN)
-  cityId    Int?
-  city      City?    @relation(fields: [cityId], references: [id])
+  cityId    Int
+  city      City   @relation(fields: [cityId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
