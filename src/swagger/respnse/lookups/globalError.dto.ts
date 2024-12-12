@@ -20,5 +20,8 @@ export class GlobalErrorResponseDto {
   message: MessageDto;
 
   @ApiProperty({ description: "error path" })
-  path: CountryResponseDto;
+  path: string;
+
+  @ApiProperty({ description: "timestamp" })
+  timestamp: string;
 }
