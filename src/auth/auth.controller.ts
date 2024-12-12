@@ -1,34 +1,49 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { LoginUserDto } from 'src/dto/login.dto';
-import { LoginUserResponseDto } from 'src/swagger/respnse/user/loginUser.dto';
-import { UserResponseDto } from 'src/swagger/respnse/user/createUser.dto';
-import { CreateUserDto } from 'src/dto/createUser.dto';
+import { Body, Controller, Post } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { PrismaService } from "src/prisma/prisma.service";
+import { ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { LoginUserDto } from "src/dto/login.dto";
+import { LoginUserResponseDto } from "src/swagger/respnse/user/loginUser.dto";
+import { UserResponseDto } from "src/swagger/respnse/user/createUser.dto";
+import { CreateUserDto } from "src/dto/createUser.dto";
+import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.dto";
 
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
-    constructor(
-        private readonly authService: AuthService,
-        private readonly prisma: PrismaService,
-      ) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService
+  ) {}
 
-      @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
+  @Post("register")
+  @ApiOperation({ summary: "Register a new user" })
   @ApiResponse({
     status: 201,
-    description: 'The user has been successfully created.',
-    type: UserResponseDto 
+    description: "The user has been successfully created.",
+    type: UserResponseDto,
   })
-  @ApiBody({ type: CreateUserDto }) 
+  @ApiResponse({
+    status: 400,
+    description: "User already exists.",
+    type: GlobalErrorResponseDto,
+  })
+  @ApiBody({ type: CreateUserDto })
   async createUser(@Body() userData: CreateUserDto) {
     return this.authService.createUser(userData);
   }
 
-  @Post('login')
-  @ApiOperation({ summary: 'Login a user' })
-  @ApiResponse({ status: 200, description: 'The user has been successfully logged in.' , type: LoginUserResponseDto})
+  @Post("login")
+  @ApiOperation({ summary: "Login a user" })
+  @ApiResponse({
+    status: 200,
+    description: "The user has been successfully logged in.",
+    type: LoginUserResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid credentials.",
+    type: GlobalErrorResponseDto,
+  })
   @ApiBody({ type: LoginUserDto })
   async login(@Body() userData: LoginUserDto) {
     return this.authService.login(userData);

@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Req } from "@nestjs/common";
 import { LookupsService } from "./lookups.service";
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { CountryResponseDto } from "src/swagger/respnse/lookups/country.dto";
 import { CityResponseDto } from "src/swagger/respnse/lookups/city.dto";
 
