@@ -21,8 +21,20 @@ export class AuthService {
   }
   // Create a new user
   async createUser(data: CreateUserDto) {
+    // check role if manager throw error
+    if (data.role === "MANAGER") {
+      throw new BadRequestException("Manager role is not allowed");
+    }
+
     if (await this.checkUserExists(data.email)) {
       throw new BadRequestException("User already exists");
+    }
+    // check if city exists
+    const city = await this.prisma.city.findUnique({
+      where: { id: Number(data.cityId) },
+    });
+    if (!city) {
+      throw new BadRequestException("City not found");
     }
 
     // Hash the password before saving it
@@ -32,6 +44,7 @@ export class AuthService {
       data: {
         ...data,
         password: hashedPassword,
+        cityId: city.id,
       },
       include: {
         city: {

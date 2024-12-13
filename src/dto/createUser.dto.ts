@@ -7,6 +7,8 @@ import {
   IsOptional,
   IsEnum,
   IsNumber,
+  IsNumberString,
+  Matches,
 } from "class-validator";
 import { Role } from "@prisma/client"; // Import Role enum from Prisma
 import { ApiProperty } from "@nestjs/swagger";
@@ -42,13 +44,20 @@ export class CreateUserDto {
   @ApiProperty({ description: "The postal code of the user" })
   postalCode: string;
 
-  @IsNumber()
+  @IsString()
+  @IsNotEmpty()
+  @IsNumberString() // Ensures the string contains only numbers
   @ApiProperty({ description: "The city of the user" })
-  cityId: number;
+  cityId: string; // Ch
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: "The phone number of the user" })
+  @Matches(/^\+[1-9]{1}[0-9]{1,14}[\d]+$/, {
+    message:
+      "Phone number must be in international format with country code and local number.",
+  })
+  @ApiProperty({ description: "The  phone number including country code", example: "+1 1234567890" })
+
   phone: string;
 
   // Remove `name` and `age` if they are not part of your schema
