@@ -143,7 +143,7 @@ export class AuthService {
 
     const hashedPassword = await PasswordService.hashPassword(
       resetPasswordDto.newPassword
-    );
+    ); 
 
     await this.prisma.user.update({
       where: { id: user.id },

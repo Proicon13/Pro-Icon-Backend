@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
+import { hostname } from "os";
 // import { MailerOptions } from './mailer-options.interface';
 
 @Injectable()
@@ -9,11 +10,16 @@ export class MailService {
   constructor() {
     // Create a transporter using SMTP (or other options like Gmail, SendGrid, etc.)
     this.transporter = nodemailer.createTransport({
-      service: "gmail", // Use the Gmail service directly
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
       },
+      tls: {
+        rejectUnauthorized: false, // Needed for some environments (optional)
+      }
     });
   }
 
