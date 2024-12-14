@@ -112,7 +112,7 @@ export class AuthService {
     // Generate a reset token & EXPIRATION DATE
     const resetToken = Math.floor(Math.random() * 1000000).toString();
     const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 1);
+    expirationDate.setMinutes(expirationDate.getMinutes() + 30);
 
     // Store the reset token in the database
     await this.prisma.user.update({
@@ -143,7 +143,7 @@ export class AuthService {
 
     const hashedPassword = await PasswordService.hashPassword(
       resetPasswordDto.newPassword
-    ); 
+    );
 
     await this.prisma.user.update({
       where: { id: user.id },

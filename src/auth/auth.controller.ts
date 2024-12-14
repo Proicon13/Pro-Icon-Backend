@@ -9,6 +9,7 @@ import { CreateUserDto } from "src/dto/createUser.dto";
 import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.dto";
 import { SendResetEmailDto } from "src/dto/sendResetEmail.dto";
 import { ResetPasswordDto } from "src/dto/resetPassword.dto";
+import { ForgetPasswordResponseDto } from "src/swagger/respnse/user/forgetPassword.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -51,25 +52,26 @@ export class AuthController {
     return this.authService.login(userData);
   }
 
-
   @Post("forgot-password")
   @ApiOperation({ summary: "Send a reset password email" })
   @ApiResponse({
     status: 200,
     description: "The reset password email has been sent.",
+    type: ForgetPasswordResponseDto,
   })
   @ApiBody({ type: SendResetEmailDto })
-  async sendResetPasswordEmail(@Body() sendResetPasswordEmail: SendResetEmailDto) {
+  async sendResetPasswordEmail(
+    @Body() sendResetPasswordEmail: SendResetEmailDto
+  ) {
     return this.authService.sendResetPasswordEmail(sendResetPasswordEmail);
   }
-
-
 
   @Post("reset-password")
   @ApiOperation({ summary: "Reset a user's password" })
   @ApiResponse({
     status: 200,
     description: "The password has been successfully reset.",
+    type: ForgetPasswordResponseDto,
   })
   @ApiBody({ type: ResetPasswordDto })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
