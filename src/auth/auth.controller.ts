@@ -7,6 +7,8 @@ import { LoginUserResponseDto } from "src/swagger/respnse/user/loginUser.dto";
 import { UserResponseDto } from "src/swagger/respnse/user/createUser.dto";
 import { CreateUserDto } from "src/dto/createUser.dto";
 import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.dto";
+import { SendResetEmailDto } from "src/dto/sendResetEmail.dto";
+import { ResetPasswordDto } from "src/dto/resetPassword.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -47,5 +49,30 @@ export class AuthController {
   @ApiBody({ type: LoginUserDto })
   async login(@Body() userData: LoginUserDto) {
     return this.authService.login(userData);
+  }
+
+
+  @Post("forgot-password")
+  @ApiOperation({ summary: "Send a reset password email" })
+  @ApiResponse({
+    status: 200,
+    description: "The reset password email has been sent.",
+  })
+  @ApiBody({ type: SendResetEmailDto })
+  async sendResetPasswordEmail(@Body() sendResetPasswordEmail: SendResetEmailDto) {
+    return this.authService.sendResetPasswordEmail(sendResetPasswordEmail);
+  }
+
+
+
+  @Post("reset-password")
+  @ApiOperation({ summary: "Reset a user's password" })
+  @ApiResponse({
+    status: 200,
+    description: "The password has been successfully reset.",
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }

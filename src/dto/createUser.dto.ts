@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsNumberString,
   Matches,
+  IsPhoneNumber,
 } from "class-validator";
 import { Role } from "@prisma/client"; // Import Role enum from Prisma
 import { ApiProperty } from "@nestjs/swagger";
@@ -48,14 +49,12 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsNumberString() // Ensures the string contains only numbers
   @ApiProperty({ description: "The city of the user" })
-  cityId: string; // Ch
+  cityId: string; 
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+[1-9]{1}[0-9]{1,14}[\d]+$/, {
-    message:
-      "Phone number must be in international format with country code and local number.",
-  })
+
+  @IsPhoneNumber(null)
   @ApiProperty({ description: "The  phone number including country code", example: "+1 1234567890" })
 
   phone: string;
