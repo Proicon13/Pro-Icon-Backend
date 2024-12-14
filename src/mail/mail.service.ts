@@ -17,9 +17,6 @@ export class MailService {
         user: process.env.EMAIL_USER,
         pass: "hrdk qzut omex cprz",
       },
-      tls: {
-        rejectUnauthorized: false, // Needed for some environments (optional)
-      }
     });
   }
 
