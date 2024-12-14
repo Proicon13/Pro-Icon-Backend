@@ -15,7 +15,7 @@ export class MailService {
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: "hrdk qzut omex cprz",
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
   }
