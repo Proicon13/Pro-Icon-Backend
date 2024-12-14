@@ -31,7 +31,15 @@ async function bootstrap() {
   );
 
   // Apply the global exception filter
-  app.useGlobalFilters(new AllExceptionsFilter()); 
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Enable CORS for all origins
+  app.enableCors({
+    origin: true, // Allow all origins
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
+    allowedHeaders: "Content-Type, Authorization", // Allowed headers
+    credentials: true, // Allow cookies and authorization headers
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
