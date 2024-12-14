@@ -15,7 +15,7 @@ export class MailService {
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: "hrdk qzut omex cprz",
       },
       tls: {
         rejectUnauthorized: false, // Needed for some environments (optional)
