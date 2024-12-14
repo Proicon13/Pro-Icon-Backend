@@ -9,10 +9,9 @@ export class MailService {
 
   constructor() {
     // Create a transporter using SMTP (or other options like Gmail, SendGrid, etc.)
-    console.log("Email User:", process.env.EMAIL_USER, "Email Password:", process.env.EMAIL_PASSWORD);
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      service : 'gmail',
+      service: "gmail",
       port: 587,
       secure: false,
       auth: {
@@ -24,6 +23,13 @@ export class MailService {
 
   // Method to send an email
   async sendEmail(to: string, subject: string, text: string): Promise<void> {
+    console.log(
+      "Email User:",
+      process.env.EMAIL_USER,
+      "Email Password:",
+      process.env.EMAIL_PASSWORD
+    );
+
     const mailOptions = {
       from: '"pro-icon" <' + process.env.EMAIL_USER + ">", // Your sender email
       to: to,
