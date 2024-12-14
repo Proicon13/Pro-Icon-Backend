@@ -9,8 +9,10 @@ export class MailService {
 
   constructor() {
     // Create a transporter using SMTP (or other options like Gmail, SendGrid, etc.)
+    console.log("Email User:", process.env.EMAIL_USER, "Email Password:", process.env.EMAIL_PASSWORD);
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
+      service : 'gmail',
       port: 587,
       secure: false,
       auth: {
