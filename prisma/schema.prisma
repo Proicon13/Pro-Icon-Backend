@@ -65,6 +65,8 @@ model Program {
   createdById Int
   createdBy   User    @relation(fields: [createdById], references: [id])
   duration    Int
+  pulse       Int
+  hertez      Int
 
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])

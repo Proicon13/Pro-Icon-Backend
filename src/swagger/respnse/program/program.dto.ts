@@ -17,4 +17,10 @@ export class ProgramResponseDto {
 
   @ApiProperty({ description: "the program duration" })
   duration: number;
+
+  @ApiProperty({ description: "the program pulse" })
+  pulse: number;
+
+  @ApiProperty({ description: "the program hertez" })
+  hertez: number;
 }
