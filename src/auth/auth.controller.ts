@@ -1,7 +1,13 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { PrismaService } from "src/prisma/prisma.service";
-import { ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import {
+  ApiBasicAuth,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from "@nestjs/swagger";
 import { LoginUserDto } from "src/dto/login.dto";
 import { LoginUserResponseDto } from "src/swagger/respnse/user/loginUser.dto";
 import { UserResponseDto } from "src/swagger/respnse/user/createUser.dto";
@@ -10,6 +16,7 @@ import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.
 import { SendResetEmailDto } from "src/dto/sendResetEmail.dto";
 import { ResetPasswordDto } from "src/dto/resetPassword.dto";
 import { ForgetPasswordResponseDto } from "src/swagger/respnse/user/forgetPassword.dto";
+import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
 
 @Controller("auth")
 export class AuthController {
@@ -76,5 +83,19 @@ export class AuthController {
   @ApiBody({ type: ResetPasswordDto })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Get("me")
+  @ApiOperation({ summary: "Get the current user" })
+  @ApiResponse({
+    status: 200,
+    description: "The current user has been successfully retrieved.",
+    type: UserResponseDto,
+  })
+  @ApiBearerAuth('access-token')
+  @UseGuards(GeneralAuthGuard)
+  async me(@Req() req) {
+    const user = req.user;
+    return this.authService.getUser(user.id);
   }
 }

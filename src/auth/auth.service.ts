@@ -67,7 +67,14 @@ export class AuthService {
     });
 
     //remove password from response
-    const { password, createdAt, updatedAt, ...result } = user;
+    const {
+      password,
+      createdAt,
+      updatedAt,
+      resetToken,
+      resetTokenExpires,
+      ...result
+    } = user;
     return result;
   }
 
@@ -157,5 +164,35 @@ export class AuthService {
     return {
       message: "Password reset successful",
     };
+  }
+
+  async getUser(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        city: {
+          select: {
+            id: true,
+            name: true,
+            country: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const {
+      password,
+      createdAt,
+      updatedAt,
+      resetToken,
+      resetTokenExpires,
+      ...result
+    } = user;
+    return result;
   }
 }
