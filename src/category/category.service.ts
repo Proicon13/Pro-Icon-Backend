@@ -40,6 +40,8 @@ export class CategoryService {
               duration: true,
               image: true,
               createdById: true,
+              pulse: true,
+              hertez: true,
             },
           },
         },
