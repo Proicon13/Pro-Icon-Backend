@@ -105,7 +105,7 @@ export class AuthService {
       };
     }
 
-    return new BadRequestException("Invalid credentials");
+    throw  new BadRequestException("Invalid credentials");
   }
 
   async sendResetPasswordEmail(sendResetEmailDto: SendResetEmailDto) {
