@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
@@ -17,6 +17,8 @@ import { SendResetEmailDto } from "src/dto/sendResetEmail.dto";
 import { ResetPasswordDto } from "src/dto/resetPassword.dto";
 import { ForgetPasswordResponseDto } from "src/swagger/respnse/user/forgetPassword.dto";
 import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { handleImageUploads } from "src/utils/saveImage";
 
 @Controller("auth")
 export class AuthController {
@@ -98,4 +100,7 @@ export class AuthController {
     const user = req.user;
     return this.authService.getUser(user.id);
   }
+
+
+  
 }

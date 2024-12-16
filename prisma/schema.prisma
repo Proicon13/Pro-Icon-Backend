@@ -11,42 +11,67 @@ datasource db {
 }
 
 model User {
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  password          String
+  fullname          String
+  image             String?
+  address           String?
+  postalCode        String?
+  phone             String?
+  role              Role      @default(ADMIN)
+  cityId            Int
+  city              City      @relation(fields: [cityId], references: [id])
+  resetToken        String?
+  resetTokenExpires DateTime?
+  programs          Program[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model City {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  fullname  String
-  image     String?
-  address   String?
-  postalCode   String?
-  phone       String?
-  role      Role     @default(ADMIN)
-  cityId    Int
-  city      City   @relation(fields: [cityId], references: [id])
-  resetToken      String?  
-  resetTokenExpires DateTime? 
+  name      String
+  countryId Int
+  country   Country  @relation(fields: [countryId], references: [id])
+  users     User[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model City {
-  id        Int       @id @default(autoincrement())
-  name      String
-  countryId Int
-  country   Country   @relation(fields: [countryId], references: [id])
-  users     User[]    
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
 model Country {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  cities    City[]    // This relationship allows a country to be linked to many cities
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  cities    City[] // This relationship allows a country to be linked to many cities
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  programs    Program[]
+}
 
+model Program {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  image       String?
+  createdById Int
+  createdBy   User    @relation(fields: [createdById], references: [id])
+  duration    Int
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 enum Role {
   MANAGER
