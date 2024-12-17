@@ -105,7 +105,7 @@ export class AuthService {
       };
     }
 
-    throw  new BadRequestException("Invalid credentials");
+    throw new BadRequestException("Invalid credentials");
   }
 
   async sendResetPasswordEmail(sendResetEmailDto: SendResetEmailDto) {
@@ -117,7 +117,11 @@ export class AuthService {
     }
 
     // Generate a reset token & EXPIRATION DATE
-    const resetToken = Math.floor(Math.random() * 1000000).toString();
+    //const resetToken = Math.floor(Math.random() * 1000000).toString();
+    const resetToken = Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, "0");
+
     const expirationDate = new Date();
     expirationDate.setMinutes(expirationDate.getMinutes() + 30);
 
