@@ -9,7 +9,7 @@ import { Request } from "express";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
-export class GeneralAuthGuard implements CanActivate {
+export class TrainerGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private prisma: PrismaService
@@ -34,6 +34,10 @@ export class GeneralAuthGuard implements CanActivate {
 
       if (!user) {
         throw new UnauthorizedException();
+      }
+
+      if (user.role !== "TRAINER") {
+        throw new UnauthorizedException("User is not a trainer");
       }
 
       request.user = user;

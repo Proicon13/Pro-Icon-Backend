@@ -20,11 +20,16 @@ model User {
   postalCode        String?
   phone             String?
   role              Role      @default(ADMIN)
+  status            Status    @default(ACTIVE)
   cityId            Int
   city              City      @relation(fields: [cityId], references: [id])
   resetToken        String?
   resetTokenExpires DateTime?
   programs          Program[]
+  clients           Client[]
+  belongToId        Int? // Nullable field for self-relation (belonging to another user)
+  belongs           User?     @relation("UserAdmin", fields: [belongToId], references: [id]) // Self-relation
+  subordinates      User[]    @relation("UserAdmin") // This establishes the reverse relationship (the users who belong to this user)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -35,6 +40,7 @@ model City {
   countryId Int
   country   Country  @relation(fields: [countryId], references: [id])
   users     User[]
+  clients   Client[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -75,7 +81,76 @@ model Program {
   updatedAt DateTime @updatedAt
 }
 
+model Client {
+  id         Int             @id @default(autoincrement()) // Auto-increment ID
+  name       String
+  email      String          @unique
+  phone      String?
+  address    String?
+  postalCode String?
+  status     Status          @default(ACTIVE)
+  gender     Gender          @default(MALE)
+  cityId     Int
+  city       City            @relation(fields: [cityId], references: [id]) // Linking to City
+  injuries   ClientInjury[] // Many-to-many with Injury lookup table
+  diseases   ClientDisease[] // Many-to-many with Disease lookup table
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  User       User?           @relation(fields: [userId], references: [id])
+  userId     Int?
+}
+
+model Injury {
+  id          Int            @id @default(autoincrement()) // Auto-increment ID
+  name        String         @unique
+  description String?
+  clients     ClientInjury[] // Many-to-many relationship via ClientInjury table
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now())
+}
+
+model Disease {
+  id          Int             @id @default(autoincrement()) // Auto-increment ID
+  name        String          @unique
+  description String?
+  clients     ClientDisease[] // Many-to-many relationship via ClientDisease table
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now())
+}
+
+// Join tables for many-to-many relationships
+model ClientInjury {
+  clientId  Int
+  injuryId  Int
+  client    Client   @relation(fields: [clientId], references: [id])
+  injury    Injury   @relation(fields: [injuryId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([clientId, injuryId])
+}
+
+model ClientDisease {
+  clientId  Int
+  diseaseId Int
+  client    Client   @relation(fields: [clientId], references: [id])
+  disease   Disease  @relation(fields: [diseaseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([clientId, diseaseId])
+}
+
 enum Role {
   MANAGER
   ADMIN
+  TRAINER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }

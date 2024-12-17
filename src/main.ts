@@ -1,9 +1,10 @@
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
-import { ValidationPipe } from "@nestjs/common";
+import {  ValidationPipe } from "@nestjs/common";
 import * as dotenv from "dotenv";
 import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
+import * as morgan from 'morgan';
 dotenv.config();
 
 async function bootstrap() {
@@ -40,6 +41,8 @@ async function bootstrap() {
     allowedHeaders: "Content-Type, Authorization", // Allowed headers
     credentials: true, // Allow cookies and authorization headers
   });
+
+  app.use(morgan('combined'));
 
   await app.listen(process.env.PORT ?? 3000);
 }

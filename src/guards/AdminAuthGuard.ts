@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { Status } from "@prisma/client";
 import { Request } from "express";
 import { PrismaService } from "src/prisma/prisma.service";
 
@@ -37,6 +38,10 @@ export class AdminAuthGuard implements CanActivate {
       }
       if (user.role !== "ADMIN") {
         throw new UnauthorizedException("User is not an admin");
+      }
+
+      if (user.status !== Status.ACTIVE) {
+        throw new UnauthorizedException("User is not active");
       }
 
       request.user = user;

@@ -31,4 +31,22 @@ export class LookupsService {
       },
     });
   }
+
+  async getInjuries() {
+    return await this.prisma.injury.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
+
+  async getDiseases() {
+    return await this.prisma.disease.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
 }

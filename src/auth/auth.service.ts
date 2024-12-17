@@ -91,9 +91,6 @@ export class AuthService {
     ) {
       const payload = { sub: user.id, email: user.email };
 
-      // Ensure the JWT_SECRET is available
-      console.log("Payload:", payload);
-      console.log("JWT Secret:", process.env.JWT_SECRET); // Debugging to check if the secret is set
 
       // Sign the payload with JWT secret and generate a token
       const accessToken = await this.jwtService.signAsync(payload, {
