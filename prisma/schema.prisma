@@ -83,11 +83,12 @@ model Program {
 
 model Client {
   id         Int             @id @default(autoincrement()) // Auto-increment ID
-  name       String
+  fullname   String
   email      String          @unique
   phone      String?
   address    String?
   postalCode String?
+  image      String?
   status     Status          @default(ACTIVE)
   gender     Gender          @default(MALE)
   cityId     Int
@@ -96,7 +97,7 @@ model Client {
   diseases   ClientDisease[] // Many-to-many with Disease lookup table
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
-  User       User?           @relation(fields: [userId], references: [id])
+  user       User?           @relation(fields: [userId], references: [id])
   userId     Int?
 }
 

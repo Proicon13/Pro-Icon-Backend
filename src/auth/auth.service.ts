@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { CreateUserDto } from "../dto/createUser.dto";
 import { UpdateUserDto } from "../dto/updateUser.dto";
 import { PasswordService } from "src/utils/passwordService";
@@ -25,10 +25,6 @@ export class AuthService {
   }
   // Create a new user
   async createUser(data: CreateUserDto) {
-    // check role if manager throw error
-    if (data.role === "MANAGER") {
-      throw new BadRequestException("Manager role is not allowed");
-    }
 
     if (await this.checkUserExists(data.email)) {
       throw new BadRequestException("User already exists");
@@ -73,6 +69,8 @@ export class AuthService {
       updatedAt,
       resetToken,
       resetTokenExpires,
+      belongToId,
+      cityId,
       ...result
     } = user;
     return result;
@@ -192,6 +190,65 @@ export class AuthService {
       updatedAt,
       resetToken,
       resetTokenExpires,
+      belongToId,
+      cityId,
+      ...result
+    } = user;
+    return result;
+  }
+
+
+
+  async addTrainerByAdmin(data: CreateUserDto, adminId: number) {
+
+    if (await this.checkUserExists(data.email)) {
+      throw new BadRequestException("User already exists");
+    }
+    // check if city exists
+    const city = await this.prisma.city.findUnique({
+      where: { id: Number(data.cityId) },
+    });
+    if (!city) {
+      throw new BadRequestException("City not found");
+    }
+
+    // Hash the password before saving it
+    const hashedPassword = await PasswordService.hashPassword(data.password);
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+        cityId: city.id,
+        belongToId: adminId,
+        role: Role.TRAINER,
+        
+      },
+      include: {
+        city: {
+          select: {
+            id: true,
+            name: true,
+            country: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    //remove password from response
+    const {
+      password,
+      createdAt,
+      updatedAt,
+      resetToken,
+      resetTokenExpires,
+      belongToId,
+      cityId,
       ...result
     } = user;
     return result;

@@ -30,10 +30,7 @@ export class CreateUserDto {
   @ApiProperty({ description: "The full name of the user" })
   fullname: string; // Add the fullname field
 
-  @IsOptional()
-  @IsEnum(Role)
-  @ApiProperty({ description: "The role of the user" })
-  role: Role = Role.ADMIN; // Default to ADMIN
+ 
 
   @IsOptional()
   @IsString()

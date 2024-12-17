@@ -9,12 +9,13 @@ import { MailService } from './mail/mail.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CategoryModule } from './category/category.module';
+import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [UserModule, AuthModule, LookupsModule,ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'uploads'), 
     serveRoot: '/uploads', 
-  }), CategoryModule,],
+  }), CategoryModule, ClientModule,],
   controllers: [AppController],
   providers: [AppService, PrismaService, MailService],
 })

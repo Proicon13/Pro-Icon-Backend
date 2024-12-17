@@ -22,7 +22,6 @@ export class AdminAuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
-    try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET || "defaultSecretKey",
       });
@@ -45,15 +44,14 @@ export class AdminAuthGuard implements CanActivate {
       }
 
       request.user = user;
-    } catch {
-      throw new UnauthorizedException();
-    }
+    
 
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(" ") ?? [];
+    console.log(token);
     return type === "Bearer" ? token : undefined;
   }
 }

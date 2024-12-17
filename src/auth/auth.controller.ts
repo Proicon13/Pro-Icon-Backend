@@ -19,6 +19,7 @@ import { ForgetPasswordResponseDto } from "src/swagger/respnse/user/forgetPasswo
 import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { handleImageUploads } from "src/utils/saveImage";
+import { AdminAuthGuard } from "src/guards/AdminAuthGuard";
 
 @Controller("auth")
 export class AuthController {
@@ -101,6 +102,28 @@ export class AuthController {
     return this.authService.getUser(user.id);
   }
 
+
+
+
+
+  @Post("add-trainer-by-admin")
+  @ApiOperation({ summary: "Register a new user" })
+  @ApiResponse({
+    status: 201,
+    description: "The user has been successfully created.",
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: "User already exists.",
+    type: GlobalErrorResponseDto,
+  })
+  @ApiBody({ type: CreateUserDto })
+  @UseGuards(AdminAuthGuard)
+  async addTrainerByAdmin(@Body() userData: CreateUserDto, @Req() req) {
+    const adminId = req.user.id
+    return this.authService.addTrainerByAdmin(userData, adminId);
+  }
 
   
 }

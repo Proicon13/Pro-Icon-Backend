@@ -21,29 +21,25 @@ export class MangerAuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET || "defaultSecretKey",
-      });
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: process.env.JWT_SECRET || "defaultSecretKey",
+    });
 
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-      });
+    // 💡 We're assigning the payload to the request object here
+    // so that we can access it in our route handlers
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
 
-      if (!user) {
-        throw new UnauthorizedException();
-      }
-
-      if (user.role !== "MANAGER") {
-        throw new UnauthorizedException("User is not a manager");
-      }
-
-      request.user = user;
-    } catch {
+    if (!user) {
       throw new UnauthorizedException();
     }
+
+    if (user.role !== "MANAGER") {
+      throw new UnauthorizedException("User is not a manager");
+    }
+
+    request.user = user;
 
     return true;
   }

@@ -21,25 +21,22 @@ export class GeneralAuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET || "defaultSecretKey",
-      });
 
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-      });
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: process.env.JWT_SECRET || "defaultSecretKey",
+    });
 
-      if (!user) {
-        throw new UnauthorizedException();
-      }
+    // 💡 We're assigning the payload to the request object here
+    // so that we can access it in our route handlers
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
 
-      request.user = user;
-    } catch {
+    if (!user) {
       throw new UnauthorizedException();
     }
+
+    request.user = user;
 
     return true;
   }
