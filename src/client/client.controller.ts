@@ -75,10 +75,24 @@ export class ClientController {
     type: Number,
     example: 10,
   })
+  @ApiQuery({
+    name: "searchKey",
+    required: false,
+    description: "Search key for filtering clients",
+    type: String,
+
+  })
+ 
   @UseGuards(GeneralAuthGuard)
   getAllClients(@Req() req, @Query() query) {
     const user = req.user;
-    const { page, perPage } = query;
-    return this.clientService.getAllClients(user.id, user.role, page, perPage);
+    const { page, perPage, searchKey,...filters } = query;
+    return this.clientService.getAllClients(
+      user.id,
+      user.role,
+      page,
+      perPage,
+      searchKey
+    );
   }
 }

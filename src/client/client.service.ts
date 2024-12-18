@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { createClientDto } from "src/dto/createClient.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { handleImageUploads } from "src/utils/saveImage";
@@ -63,10 +63,11 @@ export class ClientService {
     return result;
   }
 
-  async getAllClients(userId: number, role: string, page, perPage) {
+  async getAllClients(userId: number, role: string, page, perPage, searchKey) {
     const skip = ((page || 1) - 1) * (perPage || 10);
     const take = Number(perPage || 10);
-    // Define the common query structure
+
+    // Define the common query structure for selection
     const commonSelect = {
       id: true,
       fullname: true,
@@ -98,15 +99,47 @@ export class ClientService {
       },
     };
 
-    // Apply role-based filters
-    const whereClause = role === Role.TRAINER ? { userId: userId } : {};
+    // Initialize whereClause as an empty object
+    let whereClause: any = {};
 
+    // Initialize an array to hold the OR conditions
+    const orConditions: any = [];
+
+    // Apply email filter if provided
+    if (searchKey) {
+      orConditions.push({
+        email: {
+          contains: searchKey.toString(),
+          mode: "insensitive",
+        },
+
+        fullname: {
+          contains: searchKey.toString(),
+          mode: "insensitive",
+        },
+      });
+    }
+
+    // Apply role-based filters
+    if (role === Role.TRAINER) {
+      whereClause.userId = userId; // Directly add userId condition for trainers
+    }
+
+    // If there are OR conditions, add them to whereClause
+    if (orConditions.length > 0) {
+      whereClause.OR = orConditions;
+    }
+
+    // Get the count of matching clients
     const clientCount = await this.prisma.client.count({
       where: whereClause,
     });
 
+
+    // Calculate total pages for pagination
     const totalPages = Math.ceil(clientCount / perPage);
 
+    // Fetch the clients with pagination and filters
     const clients = await this.prisma.client.findMany({
       skip,
       take,
