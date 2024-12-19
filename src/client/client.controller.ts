@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Put,
+  Param,
   Post,
   Query,
   Req,
@@ -24,6 +26,8 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { clientResponseDto } from "src/swagger/respnse/client/createClient.dto";
 import { ClientBodyDto } from "src/dto/clientBody.dto";
 import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
+import { updateClientDto } from "src/dto/updateClient.dto";
+import { UpdateClientBodyDto } from "src/dto/updateClientBody.dto";
 
 @Controller("clients")
 export class ClientController {
@@ -85,12 +89,12 @@ export class ClientController {
     name: "orderBy",
     required: false,
     description: "Order by field for sorting clients",
-    enum: ["ALPHA-ASC","ALPHA-DESC", "NEWEST", "OLDEST"],
+    enum: ["ALPHA-ASC", "ALPHA-DESC", "NEWEST", "OLDEST"],
   })
   @UseGuards(GeneralAuthGuard)
   getAllClients(@Req() req, @Query() query) {
     const user = req.user;
-    const { page, perPage, searchKey,orderBy, ...filters } = query;
+    const { page, perPage, searchKey, orderBy, ...filters } = query;
     return this.clientService.getAllClients(
       user.id,
       user.role,
@@ -99,5 +103,41 @@ export class ClientController {
       searchKey,
       orderBy
     );
+  }
+
+  @Get(":id")
+  @UseGuards(GeneralAuthGuard)
+  @ApiOperation({ summary: "Get a client by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "The client has been successfully fetched.",
+    type: clientResponseDto,
+  })
+  getClientById(@Param("id") id: number) {
+    return this.clientService.getClientById(id);
+  }
+
+  @Put(":id")
+  @UseGuards(GeneralAuthGuard)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiOperation({ summary: "Update a client by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "The client has been successfully updated.",
+    type: updateClientDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Client not found.",
+    type: GlobalErrorResponseDto,
+  })
+  @ApiBody({ type: UpdateClientBodyDto })
+  updateClient(
+    @Param("id") id: number,
+    @Body() data: updateClientDto,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    return this.clientService.updateClient(id, data, file);
   }
 }

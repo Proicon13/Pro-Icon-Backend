@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma, Role } from "@prisma/client";
 import { createClientDto } from "src/dto/createClient.dto";
+import { updateClientDto } from "src/dto/updateClient.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { handleImageUploads } from "src/utils/saveImage";
 
@@ -179,5 +180,87 @@ export class ClientService {
       clients,
       totalPages: totalPages || 1,
     };
+  }
+
+  async getClientById(id: number) {
+    const client = await this.prisma.client.findUnique({
+      where: { id },
+      include: {
+        city: {
+          select: {
+            id: true,
+            name: true,
+            country: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            fullname: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+    return client;
+  }
+
+  async updateClient(
+    id: number,
+    data: updateClientDto,
+    file: Express.Multer.File
+  ) {
+    const client = await this.prisma.client.findUnique({
+      where: { id },
+    });
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+
+    let image = "";
+    let cityId: number;
+    if (file) {
+      image = await handleImageUploads(file, "clients");
+    }
+
+    // get city
+    if (data.cityId) {
+      let city = await this.prisma.city.findUnique({
+        where: { id: Number(data.cityId) },
+        select: { id: true },
+      });
+
+      if (!city) {
+        throw new BadRequestException("City not found");
+      }
+
+      cityId = city.id;
+    } else {
+      cityId = client.cityId;
+    }
+
+    const updatedClient = await this.prisma.client.update({
+      where: { id },
+      data: {
+        image: image ? image : client.image,
+        cityId: cityId,
+        status: data.status ? data.status : client.status,
+        fullname: data.fullname ? data.fullname : client.fullname,
+        phone: data.phone ? data.phone : client.phone,
+        address: data.address ? data.address : client.address,
+        postalCode: data.postalCode ? data.postalCode : client.postalCode,
+        gender: data.gender ? data.gender : client.gender,
+      },
+    });
+    return updatedClient;
   }
 }
