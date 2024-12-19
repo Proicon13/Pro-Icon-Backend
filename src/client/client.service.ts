@@ -63,7 +63,14 @@ export class ClientService {
     return result;
   }
 
-  async getAllClients(userId: number, role: string, page, perPage, searchKey) {
+  async getAllClients(
+    userId: number,
+    role: string,
+    page,
+    perPage,
+    searchKey,
+    orderBy
+  ) {
     const skip = ((page || 1) - 1) * (perPage || 10);
     const take = Number(perPage || 10);
 
@@ -104,6 +111,7 @@ export class ClientService {
 
     // Initialize an array to hold the OR conditions
     const orConditions: any = [];
+    const orderByList: any = [];
 
     // Apply email filter if provided
     if (searchKey) {
@@ -130,11 +138,30 @@ export class ClientService {
       whereClause.OR = orConditions;
     }
 
+    if (orderBy) {
+      if (orderBy === "ALPHA-ASC") {
+        orderByList.push({
+          fullname: "asc",
+        });
+      } else if (orderBy === "ALPHA-DESC") {
+        orderByList.push({
+          fullname: "desc",
+        });
+      } else if (orderBy === "NEWEST") {
+        orderByList.push({
+          createdAt: "desc",
+        });
+      } else if (orderBy === "OLDEST") {
+        orderByList.push({
+          createdAt: "asc",
+        });
+      }
+    }
+
     // Get the count of matching clients
     const clientCount = await this.prisma.client.count({
       where: whereClause,
     });
-
 
     // Calculate total pages for pagination
     const totalPages = Math.ceil(clientCount / perPage);
@@ -145,6 +172,7 @@ export class ClientService {
       take,
       where: whereClause,
       select: commonSelect,
+      orderBy: orderByList,
     });
 
     return {

@@ -80,19 +80,24 @@ export class ClientController {
     required: false,
     description: "Search key for filtering clients",
     type: String,
-
   })
- 
+  @ApiQuery({
+    name: "orderBy",
+    required: false,
+    description: "Order by field for sorting clients",
+    enum: ["ALPHA-ASC","ALPHA-DESC", "NEWEST", "OLDEST"],
+  })
   @UseGuards(GeneralAuthGuard)
   getAllClients(@Req() req, @Query() query) {
     const user = req.user;
-    const { page, perPage, searchKey,...filters } = query;
+    const { page, perPage, searchKey,orderBy, ...filters } = query;
     return this.clientService.getAllClients(
       user.id,
       user.role,
       page,
       perPage,
-      searchKey
+      searchKey,
+      orderBy
     );
   }
 }
