@@ -3,11 +3,15 @@ import { Prisma, Role } from "@prisma/client";
 import { createClientDto } from "src/dto/createClient.dto";
 import { updateClientDto } from "src/dto/updateClient.dto";
 import { PrismaService } from "src/prisma/prisma.service";
+import { FileService } from "src/utils/fileService";
 import { handleImageUploads } from "src/utils/saveImage";
 
 @Injectable()
 export class ClientService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private fileService: FileService
+  ) {}
 
   async createClient(
     data: createClientDto,
@@ -229,6 +233,7 @@ export class ClientService {
     let image = "";
     let cityId: number;
     if (file) {
+      await this.fileService.deleteFile(client.image);
       image = await handleImageUploads(file, "clients");
     }
 
