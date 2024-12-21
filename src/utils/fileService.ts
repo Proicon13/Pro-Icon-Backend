@@ -13,7 +13,7 @@ export class FileService {
   async deleteFile(fileUrl: string): Promise<void> {
     try {
       const filePath = this.getFilePathFromUrl(fileUrl);
-      console.log(`Attempting to delete file at: ${filePath}`);  // Debugging step
+      console.log(`Attempting to delete file at: ${filePath}`); // Debugging step
 
       // Check if the file exists asynchronously
       await fs.promises.access(filePath, fs.constants.F_OK);
@@ -39,7 +39,7 @@ export class FileService {
     }
     // Remove the base URL (e.g., http://localhost:3000)
     const relativePath = fileUrl.replace(baseUrl, "");
-    console.log(`Relative path extracted: ${relativePath}`);  // Debugging step
+    console.log(`Relative path extracted: ${relativePath}`); // Debugging step
 
     // Ensure no double slashes in the path
     const cleanedPath = relativePath.replace(/\/+/g, "/");
