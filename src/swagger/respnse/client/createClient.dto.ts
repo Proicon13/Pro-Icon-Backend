@@ -51,4 +51,20 @@ export class clientResponseDto {
 
   @ApiProperty({ description: "The user of the client", type: userRes })
   user: userRes;
+
+  @ApiProperty({
+    description: "The start date for the client in yyyy-mm-dd format",
+    example: "2023-12-31",
+
+    required: false,
+    format: "date",
+  })
+  startDate: Date;
+
+  @ApiProperty({
+    description: "The end date for the client in yyyy-mm-dd format",
+    example: "2023-12-31",
+    required: false,
+  })
+  endDate: Date;
 }

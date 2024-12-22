@@ -64,15 +64,16 @@ model Category {
 }
 
 model Program {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
   description String?
   image       String?
   createdById Int
-  createdBy   User    @relation(fields: [createdById], references: [id])
+  createdBy   User      @relation(fields: [createdById], references: [id])
   duration    Int
   pulse       Int
   hertez      Int
+  
 
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])
@@ -91,6 +92,8 @@ model Client {
   image      String?
   status     Status          @default(ACTIVE)
   gender     Gender          @default(MALE)
+  startDate   DateTime?
+  endDate     DateTime?
   cityId     Int
   city       City            @relation(fields: [cityId], references: [id]) // Linking to City
   injuries   ClientInjury[] // Many-to-many with Injury lookup table

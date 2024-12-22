@@ -11,9 +11,12 @@ import {
   Matches,
   IsPhoneNumber,
   isEnum,
+  IsDate,
 } from "class-validator";
 import { Gender, Role, Status } from "@prisma/client"; // Import Role enum from Prisma
 import { ApiProperty } from "@nestjs/swagger";
+import { IsEndDateGreaterThanStartDate } from "src/utils/end-date-start-date_directive-validation";
+import { Transform } from "class-transformer";
 
 export class updateClientDto {
   @IsOptional()
@@ -63,4 +66,37 @@ export class updateClientDto {
   @IsNumberString() // Ensures the string contains only numbers
   @ApiProperty({ description: "The city of the user" })
   cityId: string;
+
+  @IsOptional()
+  @IsDate()
+  @Transform(({ value }) => {
+    if (!value) return value; // If value is undefined or null, return it as is
+    console.log("Value:", typeof value);
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day + 1); // Convert to Date object
+  })
+  @ApiProperty({
+    description: "The start date for the client in yyyy-mm-dd format",
+    example: "2023-12-31",
+
+    required: false,
+    format: "date",
+  })
+  startDate: Date;
+
+  @IsOptional()
+  @IsDate()
+  @IsEndDateGreaterThanStartDate("startDate")
+  @Transform(({ value }) => {
+    if (!value) return value; // If value is undefined or null, return it as is
+    console.log("Value:", typeof value);
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day + 1); // Convert to Date object
+  })
+  @ApiProperty({
+    description: "The end date for the client in yyyy-mm-dd format",
+    example: "2023-12-31",
+    required: false,
+  })
+  endDate: Date;
 }
