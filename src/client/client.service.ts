@@ -265,6 +265,27 @@ export class ClientService {
         postalCode: data.postalCode ? data.postalCode : client.postalCode,
         gender: data.gender ? data.gender : client.gender,
       },
+      include: {
+        city: {
+          select: {
+            id: true,
+            name: true,
+            country: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            fullname: true,
+            email: true,
+          },
+        },
+      },
     });
     return updatedClient;
   }

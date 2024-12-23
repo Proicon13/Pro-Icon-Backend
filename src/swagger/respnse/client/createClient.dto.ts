@@ -58,6 +58,7 @@ export class clientResponseDto {
 
     required: false,
     format: "date",
+    type: Date,
   })
   startDate: Date;
 
@@ -65,6 +66,8 @@ export class clientResponseDto {
     description: "The end date for the client in yyyy-mm-dd format",
     example: "2023-12-31",
     required: false,
+    type: Date,
+
   })
   endDate: Date;
 }
