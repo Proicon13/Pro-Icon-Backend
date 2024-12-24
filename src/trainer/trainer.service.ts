@@ -239,4 +239,32 @@ export class TrainerService {
     });
     return updatedtrainer;
   }
+
+  async deleteTrainer(id: number, userId: number, role: Role) {
+    const trainer = await this.prisma.user.findUnique({
+      where: { id, role: Role.TRAINER, isDeleted: false },
+    });
+    if (!trainer) {
+      throw new BadRequestException("Trainer not found");
+    }
+
+    if (role == Role.ADMIN && trainer.belongToId !== userId) {
+      throw new BadRequestException(
+        "You cannot delete a trainer that does not belong to you"
+      );
+    } else if (role == Role.TRAINER) {
+      throw new BadRequestException(
+        "You cannot delete a trainer that does not belong to you"
+      );
+    }
+
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    return { message: "Trainer deleted successfully" };
+  }
 }

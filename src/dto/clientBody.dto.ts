@@ -83,6 +83,7 @@ export class ClientBodyDto {
  
    @IsOptional()
    @IsDate()
+   @IsEndDateGreaterThanStartDate("startDate")
    @Transform(({ value }) => {
      if (!value) return value; // If value is undefined or null, return it as is
      console.log("Value:", typeof value);

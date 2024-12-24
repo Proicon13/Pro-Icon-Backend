@@ -213,3 +213,67 @@ export async function puchCategories() {
   
     console.log('Gym categories and programs have been added to the database!');
   }
+
+
+  export async function insertDiseases() {
+    try {
+      const diseases = [
+        {
+          name: 'heart disease',
+          description: 'A contagious respiratory illness caused by influenza viruses.',
+        },
+        {
+          name: 'Blood sugar',
+          description: 'A chronic condition that affects how the body processes blood sugar.',
+        },
+        {
+          name: 'Blood pressure',
+          description: 'A condition in which the force of the blood against artery walls is too high.',
+        },
+      ];
+  
+      // Insert multiple rows into the Disease table
+      const insertedDiseases = await prisma.disease.createMany({
+        data: diseases,
+        skipDuplicates: true, // Avoids throwing an error if a unique constraint is violated
+      });
+  
+      console.log(`${insertedDiseases.count} diseases inserted successfully.`);
+    } catch (error) {
+      console.error('Error inserting diseases:', error);
+    } finally {
+      await prisma.$disconnect();
+    }
+  }
+
+
+  export async function insertInjuries() {
+    try {
+      const injuries = [
+        {
+          name: 'Back pain',
+          description: 'A break in the continuity of a bone.',
+        },
+        {
+          name: 'Knee pain',
+          description: 'A break in the continuity of a bone.',
+        },
+        {
+          name: 'Sholder pain',
+          description: 'A break in the continuity of a bone.',
+        },
+      ];
+  
+      // Insert multiple rows into the Injury table
+      const insertedInjuries = await prisma.injury.createMany({
+        data: injuries,
+        skipDuplicates: true, // Avoids throwing an error if a unique constraint is violated
+      });
+  
+      console.log(`${insertedInjuries.count} injuries inserted successfully.`);
+    } catch (error) {
+      console.error('Error inserting injuries:', error);
+    } finally {
+      await prisma.$disconnect();
+    }
+  }

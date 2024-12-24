@@ -19,6 +19,7 @@ model User {
   address           String?
   postalCode        String?
   phone             String?
+  isDeleted         Boolean   @default(false)
   role              Role      @default(ADMIN)
   status            Status    @default(ACTIVE)
   cityId            Int
@@ -64,16 +65,15 @@ model Category {
 }
 
 model Program {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
   description String?
   image       String?
   createdById Int
-  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdBy   User    @relation(fields: [createdById], references: [id])
   duration    Int
   pulse       Int
   hertez      Int
-  
 
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])
@@ -90,10 +90,12 @@ model Client {
   address    String?
   postalCode String?
   image      String?
+  isDeleted  Boolean         @default(false)
+  isBlocked  Boolean         @default(false)
   status     Status          @default(ACTIVE)
   gender     Gender          @default(MALE)
-  startDate   DateTime?
-  endDate     DateTime?
+  startDate  DateTime?
+  endDate    DateTime?
   cityId     Int
   city       City            @relation(fields: [cityId], references: [id]) // Linking to City
   injuries   ClientInjury[] // Many-to-many with Injury lookup table

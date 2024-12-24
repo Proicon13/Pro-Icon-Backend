@@ -28,7 +28,7 @@ export class TrainerGuard implements CanActivate {
     // 💡 We're assigning the payload to the request object here
     // so that we can access it in our route handlers
     const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
+      where: { id: payload.sub, isDeleted: false },
     });
 
     if (!user) {

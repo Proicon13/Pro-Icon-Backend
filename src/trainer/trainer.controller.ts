@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Put,
@@ -23,6 +24,7 @@ import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.dto";
 import { UpdateUserDto } from "src/dto/updateUser.dto";
+import { DeleteResponseDto } from "src/swagger/respnse/user/deleteResponse.dto";
 
 @Controller("trainers")
 export class TrainerController {
@@ -62,7 +64,7 @@ export class TrainerController {
     enum: ["ALPHA-ASC", "ALPHA-DESC", "NEWEST", "OLDEST"],
   })
   @UseGuards(GeneralAuthGuard)
-  getAllClients(@Req() req, @Query() query) {
+  getAllTrainers(@Req() req, @Query() query) {
     const user = req.user;
     const { page, perPage, searchKey, orderBy, ...filters } = query;
     return this.trainerService.getAllTrainers(
@@ -80,10 +82,10 @@ export class TrainerController {
   @ApiOperation({ summary: "Get a client by ID" })
   @ApiResponse({
     status: 200,
-    description: "The client has been successfully fetched.",
+    description: "The trainer has been successfully fetched.",
     type: UserResponseDto,
   })
-  getClientById(@Param("id") id: number) {
+  getTrainerById(@Param("id") id: number) {
     return this.trainerService.getTrainerById(id);
   }
 
@@ -94,20 +96,38 @@ export class TrainerController {
   @ApiOperation({ summary: "Update a client by ID" })
   @ApiResponse({
     status: 200,
-    description: "The client has been successfully updated.",
+    description: "The trainer has been successfully updated.",
     type: UserResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: "Client not found.",
+    description: "Trainer not found.",
     type: GlobalErrorResponseDto,
   })
   @ApiBody({ type: UpdateUserDto })
-  updateClient(
+  updateTrainer(
     @Param("id") id: number,
     @Body() data: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File
   ) {
     return this.trainerService.updateTrainer(id, data, file);
+  }
+
+  @Delete(":id")
+  @UseGuards(GeneralAuthGuard)
+  @ApiOperation({ summary: "Delete a Trainer by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "The Trainer has been successfully deleted.",
+    type: DeleteResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Trainer not found.",
+    type: GlobalErrorResponseDto,
+  })
+  deleteTrainer(@Param("id") id: number, @Req() req) {
+    const user = req.user;
+    return this.trainerService.deleteTrainer(id, user.id, user.role);
   }
 }
