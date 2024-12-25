@@ -47,15 +47,15 @@ export class ClientController {
   })
   @ApiBody({ type: ClientBodyDto })
   @ApiConsumes("multipart/form-data")
-  @UseGuards(TrainerGuard)
+  @UseGuards(GeneralAuthGuard)
   @UseInterceptors(FileInterceptor("file"))
   createClient(
     @Body() createClientDto: createClientDto,
     @UploadedFile() file: Express.Multer.File,
     @Req() req
   ) {
-    const userId = req.user.id;
-    return this.clientService.createClient(createClientDto, file, userId);
+    const user= req.user;
+    return this.clientService.createClient(createClientDto, file, user.id, user.role);
   }
 
   @Get()

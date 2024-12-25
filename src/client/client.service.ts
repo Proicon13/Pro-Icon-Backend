@@ -16,8 +16,14 @@ export class ClientService {
   async createClient(
     data: createClientDto,
     file: Express.Multer.File,
-    trainerId: number
+    trainerId: number,
+    role: Role
   ) {
+    // check if trainer exists or manager
+    if (role != Role.TRAINER && role != Role.ADMIN) {
+      throw new BadRequestException("You are not allowed to create a client");
+    }
+
     // check if client exists
     const client = await this.prisma.client.findUnique({
       where: {
@@ -76,6 +82,15 @@ export class ClientService {
     searchKey,
     orderBy
   ) {
+    //     const sqlQuery = `
+    //   SELECT id, fullname, email
+    //   FROM Client
+    //   WHERE email ILIKE $1
+    // `;
+
+    //     const result = await this.queryService.runQuery(sqlQuery, [`%${searchKey}%`]);
+    //     return result;
+
     const skip = ((page || 1) - 1) * (perPage || 10);
     const take = Number(perPage || 10);
 
@@ -122,12 +137,14 @@ export class ClientService {
     if (searchKey) {
       orConditions.push({
         email: {
-          contains: searchKey.toString(),
+          contains: searchKey,
           mode: "insensitive",
         },
+      });
 
+      orConditions.push({
         fullname: {
-          contains: searchKey.toString(),
+          contains: searchKey,
           mode: "insensitive",
         },
       });
@@ -189,7 +206,16 @@ export class ClientService {
   async getClientById(id: number) {
     const client = await this.prisma.client.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        image: true,
+        phone: true,
+        address: true,
+        postalCode: true,
+        status: true,
+        gender: true,
         city: {
           select: {
             id: true,
@@ -215,6 +241,7 @@ export class ClientService {
     if (!client) {
       throw new BadRequestException("Client not found");
     }
+
     return client;
   }
 
