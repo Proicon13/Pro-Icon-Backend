@@ -65,12 +65,14 @@ export class TrainerService {
     if (searchKey) {
       orConditions.push({
         email: {
-          contains: searchKey.toString(),
+          contains: searchKey,
           mode: "insensitive",
         },
+      });
 
+      orConditions.push({
         fullname: {
-          contains: searchKey.toString(),
+          contains: searchKey,
           mode: "insensitive",
         },
       });
