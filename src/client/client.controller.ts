@@ -18,6 +18,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiConsumes,
+  ApiParam,
 } from "@nestjs/swagger";
 import { createClientDto } from "src/dto/createClient.dto";
 import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.dto";
@@ -28,6 +29,7 @@ import { ClientBodyDto } from "src/dto/clientBody.dto";
 import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
 import { updateClientDto } from "src/dto/updateClient.dto";
 import { UpdateClientBodyDto } from "src/dto/updateClientBody.dto";
+import { DeleteResponseDto } from "src/swagger/respnse/user/deleteResponse.dto";
 
 @Controller("clients")
 export class ClientController {
@@ -144,5 +146,23 @@ export class ClientController {
     @UploadedFile() file: Express.Multer.File
   ) {
     return this.clientService.updateClient(id, data, file);
+  }
+
+  @Get(":clientId/injuries/:injuryId")
+  @UseGuards(GeneralAuthGuard)
+  @ApiOperation({ summary: "Get injuries by client ID" })
+  @ApiResponse({
+    status: 200,
+    description: "The injuries have been successfully fetched.",
+    type: DeleteResponseDto,
+  })
+  @ApiParam({ name: "clientId", type: Number })
+  @ApiParam({ name: "injuryId", type: Number })
+  getInjuriesByClientId(
+    @Param("clientId") clientId: number,
+    @Param("injuryId") injuryId: number,
+    @Req() req
+  ) {
+    return this.clientService.addInjuryToClient(clientId, injuryId);
   }
 }

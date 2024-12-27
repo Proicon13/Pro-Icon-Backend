@@ -346,4 +346,62 @@ export class ClientService {
     });
     return updatedClient;
   }
+
+  async addInjuryToClient(clientId: number, injuryId: number) {
+    // check if client exists
+    const client = await this.prisma.client.findUnique({
+      where: {
+        id: clientId,
+      },
+    });
+
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+
+    // check if injury exists
+    const injury = await this.prisma.injury.findUnique({
+      where: {
+        id: injuryId,
+      },
+    });
+
+    if (!injury) {
+      throw new BadRequestException("Injury not found");
+    }
+
+    // check if client already has this injury and remove if exists
+    const clientInjury = await this.prisma.clientInjury.findFirst({
+      where: {
+        clientId,
+        injuryId,
+      },
+    });
+
+    if (clientInjury) {
+      await this.prisma.clientInjury.delete({
+        where: {
+          clientId_injuryId: {
+            clientId,
+            injuryId,
+          },
+        },
+      });
+
+      return {
+        message: "Injury removed from client",
+      };
+    }
+
+    await this.prisma.clientInjury.create({
+      data: {
+        clientId,
+        injuryId,
+      },
+    });
+
+    return {
+      message: "Injury added to client",
+    };
+  }
 }
