@@ -54,8 +54,13 @@ export class ClientController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req
   ) {
-    const user= req.user;
-    return this.clientService.createClient(createClientDto, file, user.id, user.role);
+    const user = req.user;
+    return this.clientService.createClient(
+      createClientDto,
+      file,
+      user.id,
+      user.role
+    );
   }
 
   @Get()
@@ -97,7 +102,7 @@ export class ClientController {
     const { page, perPage, searchKey, orderBy, ...filters } = query;
     return this.clientService.getAllClients(
       user.id,
-      user.role,
+      user,
       page,
       perPage,
       searchKey,
@@ -113,7 +118,7 @@ export class ClientController {
     description: "The client has been successfully fetched.",
     type: clientResponseDto,
   })
-  getClientById(@Param("id") id: number) {
+  getClientById(@Param("id") id: number, @Req() req) {
     return this.clientService.getClientById(id);
   }
 

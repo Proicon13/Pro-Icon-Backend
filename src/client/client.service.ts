@@ -76,21 +76,12 @@ export class ClientService {
 
   async getAllClients(
     userId: number,
-    role: string,
+    user: any,
     page,
     perPage,
     searchKey,
     orderBy
   ) {
-    //     const sqlQuery = `
-    //   SELECT id, fullname, email
-    //   FROM Client
-    //   WHERE email ILIKE $1
-    // `;
-
-    //     const result = await this.queryService.runQuery(sqlQuery, [`%${searchKey}%`]);
-    //     return result;
-
     const skip = ((page || 1) - 1) * (perPage || 10);
     const take = Number(perPage || 10);
 
@@ -151,8 +142,18 @@ export class ClientService {
     }
 
     // Apply role-based filters
-    if (role === Role.TRAINER) {
-      whereClause.userId = userId; // Directly add userId condition for trainers
+    if (user.role === Role.TRAINER) {
+      whereClause.userId = { in: [userId, user.belongToId] };
+    } else if (user.role === Role.ADMIN) {
+      const trainers = await this.prisma.user.findMany({
+        where: {
+          belongToId: userId,
+          role: Role.TRAINER,
+        },
+      });
+      const trainerIds = trainers.map((trainer) => trainer.id);
+      const clientsCreatorsIds = [...trainerIds, userId];
+      whereClause.userId = { in: clientsCreatorsIds };
     }
 
     // If there are OR conditions, add them to whereClause
@@ -244,6 +245,30 @@ export class ClientService {
 
     return client;
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   async updateClient(
     id: number,
