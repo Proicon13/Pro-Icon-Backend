@@ -71,7 +71,7 @@ export class clientResponseDto {
   endDate: Date;
 
   @ApiProperty({ description: "The wehight of the client" })
-  wehght: number;
+  weight: number;
 
   @ApiProperty({ description: "The height of the client" })
   height: number;
