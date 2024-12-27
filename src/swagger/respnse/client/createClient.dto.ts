@@ -67,7 +67,12 @@ export class clientResponseDto {
     example: "2023-12-31",
     required: false,
     type: Date,
-
   })
   endDate: Date;
+
+  @ApiProperty({ description: "The wehight of the client" })
+  wehght: number;
+
+  @ApiProperty({ description: "The height of the client" })
+  height: number;
 }

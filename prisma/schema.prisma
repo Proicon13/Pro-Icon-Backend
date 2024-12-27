@@ -94,6 +94,8 @@ model Client {
   isBlocked  Boolean         @default(false)
   status     Status          @default(ACTIVE)
   gender     Gender          @default(MALE)
+  weight     Float?
+  height      Float?
   startDate  DateTime?
   endDate    DateTime?
   cityId     Int

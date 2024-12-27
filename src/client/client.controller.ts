@@ -130,7 +130,7 @@ export class ClientController {
   @ApiResponse({
     status: 200,
     description: "The client has been successfully updated.",
-    type: updateClientDto,
+    type: clientResponseDto,
   })
   @ApiResponse({
     status: 400,

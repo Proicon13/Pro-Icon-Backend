@@ -46,8 +46,21 @@ export class ClientService {
         image: image,
         userId: trainerId,
         cityId: parseInt(data.cityId),
+        weight: parseInt(data.weight),
+        height: parseInt(data.height),
       },
-      include: {
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        image: true,
+        phone: true,
+        address: true,
+        postalCode: true,
+        status: true,
+        gender: true,
+        weight: true,
+        height: true,
         city: {
           select: {
             id: true,
@@ -70,8 +83,7 @@ export class ClientService {
       },
     });
 
-    const { createdAt, updatedAt, cityId, userId, ...result } = clientData;
-    return result;
+    return clientData;
   }
 
   async getAllClients(
@@ -96,6 +108,8 @@ export class ClientService {
       postalCode: true,
       status: true,
       gender: true,
+      wheight: true,
+      height: true,
       city: {
         select: {
           id: true,
@@ -217,6 +231,8 @@ export class ClientService {
         postalCode: true,
         status: true,
         gender: true,
+        weight: true,
+        height: true,
         city: {
           select: {
             id: true,
@@ -245,30 +261,6 @@ export class ClientService {
 
     return client;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   async updateClient(
     id: number,
@@ -316,8 +308,21 @@ export class ClientService {
         address: data.address ? data.address : client.address,
         postalCode: data.postalCode ? data.postalCode : client.postalCode,
         gender: data.gender ? data.gender : client.gender,
+        weight: data.weight ? Number(data.weight) : client.weight,
+        height: data.height ? Number(data.height) : client.height,
       },
-      include: {
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        image: true,
+        phone: true,
+        address: true,
+        postalCode: true,
+        status: true,
+        gender: true,
+        weight: true,
+        height: true,
         city: {
           select: {
             id: true,

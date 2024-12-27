@@ -99,4 +99,14 @@ export class updateClientDto {
     required: false,
   })
   endDate: Date;
+
+  @IsOptional()
+  @IsNumberString()
+  @ApiProperty({ description: "The weight of the client" })
+  weight: String;
+
+  @IsOptional()
+  @IsNumberString()
+  @ApiProperty({ description: "The height of the client" })
+  height: string;
 }

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Client" ADD COLUMN     "hight" DOUBLE PRECISION,
+ADD COLUMN     "weight" DOUBLE PRECISION;

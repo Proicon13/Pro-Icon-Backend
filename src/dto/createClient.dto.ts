@@ -91,4 +91,15 @@ export class createClientDto {
     required: false,
   })
   endDate: Date;
+
+
+  @IsOptional()
+  @IsNumberString()
+  @ApiProperty({ description: "The weight of the client" })
+  weight: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @ApiProperty({ description: "The height of the client" })
+  height: string;
 }
