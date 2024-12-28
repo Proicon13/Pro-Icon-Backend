@@ -404,4 +404,62 @@ export class ClientService {
       message: "Injury added to client",
     };
   }
+
+  async addDiseaseToClient(clientId: number, diseaseId: number) {
+    // check if client exists
+    const client = await this.prisma.client.findUnique({
+      where: {
+        id: clientId,
+      },
+    });
+
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+
+    // check if disease exists
+    const disease = await this.prisma.disease.findUnique({
+      where: {
+        id: diseaseId,
+      },
+    });
+
+    if (!disease) {
+      throw new BadRequestException("Disease not found");
+    }
+
+    // check if client already has this disease and remove if exists
+    const clientDisease = await this.prisma.clientDisease.findFirst({
+      where: {
+        clientId,
+        diseaseId,
+      },
+    });
+
+    if (clientDisease) {
+      await this.prisma.clientDisease.delete({
+        where: {
+          clientId_diseaseId: {
+            clientId,
+            diseaseId,
+          },
+        },
+      });
+
+      return {
+        message: "Disease removed from client",
+      };
+    }
+
+    await this.prisma.clientDisease.create({
+      data: {
+        clientId,
+        diseaseId,
+      },
+    });
+
+    return {
+      message: "Disease added to client",
+    };
+  }
 }

@@ -165,4 +165,22 @@ export class ClientController {
   ) {
     return this.clientService.addInjuryToClient(clientId, injuryId);
   }
+
+  @Get(":clientId/diseases/:diseaseId")
+  @UseGuards(GeneralAuthGuard)
+  @ApiOperation({ summary: "Get diseases by client ID" })
+  @ApiResponse({
+    status: 200,
+    description: "The diseases have been successfully fetched.",
+    type: DeleteResponseDto,
+  })
+  @ApiParam({ name: "clientId", type: Number })
+  @ApiParam({ name: "diseaseId", type: Number })
+  getDiseasesByClientId(
+    @Param("clientId") clientId: number,
+    @Param("diseaseId") diseaseId: number,
+    @Req() req
+  ) {
+    return this.clientService.addDiseaseToClient(clientId, diseaseId);
+  }
 }
