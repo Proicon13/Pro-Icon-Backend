@@ -75,4 +75,7 @@ export class clientResponseDto {
 
   @ApiProperty({ description: "The height of the client" })
   height: number;
+
+  @ApiProperty({ description: "The medical notes of the client" })
+  medicalNotes: string;
 }

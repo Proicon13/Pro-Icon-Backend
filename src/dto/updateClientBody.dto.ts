@@ -112,4 +112,9 @@ export class UpdateClientBodyDto {
   @IsNumber()
   @ApiProperty({ description: "The height of the client" })
   height: number;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: "The medical notes of the client" })
+  medicalNotes: string;
 }

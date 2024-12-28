@@ -61,6 +61,7 @@ export class ClientService {
         gender: true,
         weight: true,
         height: true,
+        medicalNotes: true,
         city: {
           select: {
             id: true,
@@ -110,6 +111,7 @@ export class ClientService {
       gender: true,
       wheight: true,
       height: true,
+      medicalNotes: true,
       city: {
         select: {
           id: true,
@@ -233,6 +235,7 @@ export class ClientService {
         gender: true,
         weight: true,
         height: true,
+        medicalNotes: true,
         city: {
           select: {
             id: true,
@@ -310,6 +313,9 @@ export class ClientService {
         gender: data.gender ? data.gender : client.gender,
         weight: data.weight ? Number(data.weight) : client.weight,
         height: data.height ? Number(data.height) : client.height,
+        medicalNotes: data.medicalNotes
+          ? data.medicalNotes
+          : client.medicalNotes,
       },
       select: {
         id: true,
@@ -323,6 +329,7 @@ export class ClientService {
         gender: true,
         weight: true,
         height: true,
+        medicalNotes: true,
         city: {
           select: {
             id: true,
