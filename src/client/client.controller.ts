@@ -90,7 +90,7 @@ export class ClientController {
 
   @Get(":clientId/injuries/:injuryId")
   @UseGuards(GeneralAuthGuard)
-  @ApiOperation({ summary: "Get injuries by client ID" })
+  @ApiOperation({ summary: "add or remove injuries by client ID" })
   @ApiResponse({ status: 200, description: "Injuries fetched.", type: DeleteResponseDto })
   @ApiParam({ name: "clientId", type: Number })
   @ApiParam({ name: "injuryId", type: Number })
@@ -100,7 +100,7 @@ export class ClientController {
 
   @Get(":clientId/diseases/:diseaseId")
   @UseGuards(GeneralAuthGuard)
-  @ApiOperation({ summary: "Get diseases by client ID" })
+  @ApiOperation({ summary: "add or remove diseases by client ID" })
   @ApiResponse({ status: 200, description: "Diseases fetched.", type: DeleteResponseDto })
   @ApiParam({ name: "clientId", type: Number })
   @ApiParam({ name: "diseaseId", type: Number })
