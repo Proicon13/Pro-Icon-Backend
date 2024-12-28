@@ -114,6 +114,6 @@ export class ClientController {
   @ApiResponse({ status: 200, description: "Injuries and diseases fetched.", type: InjuriesAndDiseasesResponseDto })
   @ApiParam({ name: "clientId", type: Number })
   getClientInjuriesAndDiseases(@Param("clientId") clientId: number, @Req() req) {
-    return this.clientService.getClientInjuriesAndDiseases(clientId, req.user);
+    return this.clientService.getClientInjuriesAndDiseases(clientId);
   }
 }

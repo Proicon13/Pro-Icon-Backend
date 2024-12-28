@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma, Role } from "@prisma/client";
-import { Console } from "console";
 import { createClientDto } from "src/dto/createClient.dto";
 import { updateClientDto } from "src/dto/updateClient.dto";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -20,19 +19,15 @@ export class ClientService {
     trainerId: number,
     role: Role
   ) {
-    // check if trainer exists or manager
-    if (role != Role.TRAINER && role != Role.ADMIN) {
+    if (role !== Role.TRAINER && role !== Role.ADMIN) {
       throw new BadRequestException("You are not allowed to create a client");
     }
 
-    // check if client exists
-    const client = await this.prisma.client.findUnique({
-      where: {
-        email: data.email,
-      },
+    const existingClient = await this.prisma.client.findUnique({
+      where: { email: data.email },
     });
 
-    if (client) {
+    if (existingClient) {
       throw new BadRequestException("Client already exists");
     }
 
@@ -44,63 +39,237 @@ export class ClientService {
     const clientData = await this.prisma.client.create({
       data: {
         ...data,
-        image: image,
+        image,
         userId: trainerId,
         cityId: parseInt(data.cityId),
         weight: parseInt(data.weight),
         height: parseInt(data.height),
       },
-      select: {
-        id: true,
-        fullname: true,
-        email: true,
-        image: true,
-        phone: true,
-        address: true,
-        postalCode: true,
-        status: true,
-        gender: true,
-        weight: true,
-        height: true,
-        medicalNotes: true,
-        city: {
-          select: {
-            id: true,
-            name: true,
-            country: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            fullname: true,
-            email: true,
-          },
-        },
-      },
+      select: this.getClientSelectFields(),
     });
 
     return clientData;
   }
 
-  async getAllClients(
-    userId: number,
-    user: any,
-    page,
-    perPage,
-    searchKey,
-    orderBy
-  ) {
+  async getAllClients(userId: number, user: any, page, perPage, searchKey, orderBy) {
     const skip = ((page || 1) - 1) * (perPage || 10);
     const take = Number(perPage || 10);
 
-    // Define the common query structure for selection
-    const commonSelect = {
+    const whereClause = await this.buildWhereClause(userId, user, searchKey);
+    const orderByList = this.getOrderByList(orderBy);
+
+    const clientCount = await this.prisma.client.count({ where: whereClause });
+    const totalPages = Math.ceil(clientCount / take);
+
+    const clients = await this.prisma.client.findMany({
+      skip,
+      take,
+      where: whereClause,
+      select: this.getClientSelectFields(),
+      orderBy: orderByList,
+    });
+
+    return { clients, totalPages: totalPages || 1 };
+  }
+
+  async getClientById(id: number) {
+    const client = await this.prisma.client.findUnique({
+      where: { id },
+      select: this.getClientSelectFields(),
+    });
+
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+
+    return client;
+  }
+
+  async updateClient(id: number, data: updateClientDto, file: Express.Multer.File) {
+    const client = await this.prisma.client.findUnique({ where: { id } });
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+
+    let image = file ? await this.updateClientImage(client.image, file) : client.image;
+    const cityId = data.cityId
+      ? await this.validateAndFetchCityId(data.cityId)
+      : client.cityId;
+
+    const updatedClient = await this.prisma.client.update({
+      where: { id },
+      data: this.buildUpdateClientData(data, client, image, cityId),
+      select: this.getClientSelectFields(),
+    });
+
+    return updatedClient;
+  }
+
+  async addInjuryToClient(clientId: number, injuryId: number) {
+    const client = await this.ensureClientExists(clientId);
+    const injury = await this.ensureInjuryExists(injuryId);
+
+    const clientInjury = await this.prisma.clientInjury.findFirst({
+      where: { clientId, injuryId },
+    });
+
+    if (clientInjury) {
+      await this.prisma.clientInjury.delete({
+        where: { clientId_injuryId: { clientId, injuryId } },
+      });
+
+      return { message: "Injury removed from client" };
+    }
+
+    await this.prisma.clientInjury.create({ data: { clientId, injuryId } });
+    return { message: "Injury added to client" };
+  }
+
+  async addDiseaseToClient(clientId: number, diseaseId: number) {
+    const client = await this.ensureClientExists(clientId);
+    const disease = await this.ensureDiseaseExists(diseaseId);
+
+    const clientDisease = await this.prisma.clientDisease.findFirst({
+      where: { clientId, diseaseId },
+    });
+
+    if (clientDisease) {
+      await this.prisma.clientDisease.delete({
+        where: { clientId_diseaseId: { clientId, diseaseId } },
+      });
+
+      return { message: "Disease removed from client" };
+    }
+
+    await this.prisma.clientDisease.create({ data: { clientId, diseaseId } });
+    return { message: "Disease added to client" };
+  }
+
+  async getClientInjuriesAndDiseases(clientId: number) {
+    const client = await this.ensureClientExists(clientId);
+
+    const [injuries, diseases] = await Promise.all([
+      this.prisma.clientInjury.findMany({
+        where: { clientId },
+        select: { injury: { select: { id: true, name: true } } },
+      }),
+      this.prisma.clientDisease.findMany({
+        where: { clientId },
+        select: { disease: { select: { id: true, name: true } } },
+      }),
+    ]);
+
+    return {
+      injuries: injuries.map(({ injury }) => injury),
+      diseases: diseases.map(({ disease }) => disease),
+    };
+  }
+
+  // Utility Methods
+  private async ensureClientExists(clientId: number) {
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client) throw new BadRequestException("Client not found");
+    return client;
+  }
+
+  private async ensureInjuryExists(injuryId: number) {
+    const injury = await this.prisma.injury.findUnique({ where: { id: injuryId } });
+    if (!injury) throw new BadRequestException("Injury not found");
+    return injury;
+  }
+
+  private async ensureDiseaseExists(diseaseId: number) {
+    const disease = await this.prisma.disease.findUnique({ where: { id: diseaseId } });
+    if (!disease) throw new BadRequestException("Disease not found");
+    return disease;
+  }
+
+  private async updateClientImage(currentImage: string, file: Express.Multer.File) {
+    await this.fileService.deleteFile(currentImage);
+    return await handleImageUploads(file, "clients");
+  }
+
+  private async validateAndFetchCityId(cityId: string) {
+    const city = await this.prisma.city.findUnique({
+      where: { id: Number(cityId) },
+      select: { id: true },
+    });
+
+    if (!city) throw new BadRequestException("City not found");
+    return city.id;
+  }
+
+  private buildUpdateClientData(
+    data: updateClientDto,
+    client: any,
+    image: string,
+    cityId: number
+  ) {
+    return {
+      image,
+      cityId,
+      status: data.status ?? client.status,
+      fullname: data.fullname ?? client.fullname,
+      phone: data.phone ?? client.phone,
+      address: data.address ?? client.address,
+      postalCode: data.postalCode ?? client.postalCode,
+      gender: data.gender ?? client.gender,
+      weight: data.weight ? Number(data.weight) : client.weight,
+      height: data.height ? Number(data.height) : client.height,
+      medicalNotes: data.medicalNotes ?? client.medicalNotes,
+    };
+  }
+
+  private async buildWhereClause(userId: number, user: any, searchKey?: string) {
+    const whereClause: any = {};
+    const orConditions: any[] = [];
+
+    if (searchKey) {
+      orConditions.push(
+        { email: { contains: searchKey, mode: "insensitive" } },
+        { fullname: { contains: searchKey, mode: "insensitive" } }
+      );
+    }
+
+    if (user.role === Role.TRAINER) {
+      whereClause.userId = { in: [userId, user.belongToId] };
+    } else if (user.role === Role.ADMIN) {
+      const trainers = await this.prisma.user.findMany({
+        where: { belongToId: userId, role: Role.TRAINER },
+      });
+      whereClause.userId = { in: trainers.map((t) => t.id).concat(userId) };
+    }
+
+    if (orConditions.length > 0) {
+      whereClause.OR = orConditions;
+    }
+
+    return whereClause;
+  }
+
+  private getOrderByList(orderBy?: string) {
+    const orderByList: any[] = [];
+
+    switch (orderBy) {
+      case "ALPHA-ASC":
+        orderByList.push({ fullname: "asc" });
+        break;
+      case "ALPHA-DESC":
+        orderByList.push({ fullname: "desc" });
+        break;
+      case "NEWEST":
+        orderByList.push({ createdAt: "desc" });
+        break;
+      case "OLDEST":
+        orderByList.push({ createdAt: "asc" });
+        break;
+    }
+
+    return orderByList;
+  }
+
+  private getClientSelectFields() {
+    return {
       id: true,
       fullname: true,
       email: true,
@@ -117,395 +286,10 @@ export class ClientService {
         select: {
           id: true,
           name: true,
-          country: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          country: { select: { id: true, name: true } },
         },
       },
-      user: {
-        select: {
-          id: true,
-          fullname: true,
-          email: true,
-        },
-      },
-    };
-
-    // Initialize whereClause as an empty object
-    let whereClause: any = {};
-
-    // Initialize an array to hold the OR conditions
-    const orConditions: any = [];
-    const orderByList: any = [];
-
-    // Apply email filter if provided
-    if (searchKey) {
-      orConditions.push({
-        email: {
-          contains: searchKey,
-          mode: "insensitive",
-        },
-      });
-
-      orConditions.push({
-        fullname: {
-          contains: searchKey,
-          mode: "insensitive",
-        },
-      });
-    }
-
-    // Apply role-based filters
-    if (user.role === Role.TRAINER) {
-      whereClause.userId = { in: [userId, user.belongToId] };
-    } else if (user.role === Role.ADMIN) {
-      const trainers = await this.prisma.user.findMany({
-        where: {
-          belongToId: userId,
-          role: Role.TRAINER,
-        },
-      });
-      const trainerIds = trainers.map((trainer) => trainer.id);
-      const clientsCreatorsIds = [...trainerIds, userId];
-      whereClause.userId = { in: clientsCreatorsIds };
-    }
-
-    // If there are OR conditions, add them to whereClause
-    if (orConditions.length > 0) {
-      whereClause.OR = orConditions;
-    }
-
-    if (orderBy) {
-      if (orderBy === "ALPHA-ASC") {
-        orderByList.push({
-          fullname: "asc",
-        });
-      } else if (orderBy === "ALPHA-DESC") {
-        orderByList.push({
-          fullname: "desc",
-        });
-      } else if (orderBy === "NEWEST") {
-        orderByList.push({
-          createdAt: "desc",
-        });
-      } else if (orderBy === "OLDEST") {
-        orderByList.push({
-          createdAt: "asc",
-        });
-      }
-    }
-
-    // Get the count of matching clients
-    const clientCount = await this.prisma.client.count({
-      where: whereClause,
-    });
-
-    // Calculate total pages for pagination
-    const totalPages = Math.ceil(clientCount / take);
-
-    // Fetch the clients with pagination and filters
-    const clients = await this.prisma.client.findMany({
-      skip,
-      take,
-      where: whereClause,
-      select: commonSelect,
-      orderBy: orderByList,
-    });
-
-    return {
-      clients,
-      totalPages: totalPages || 1,
-    };
-  }
-
-  async getClientById(id: number) {
-    const client = await this.prisma.client.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        fullname: true,
-        email: true,
-        image: true,
-        phone: true,
-        address: true,
-        postalCode: true,
-        status: true,
-        gender: true,
-        weight: true,
-        height: true,
-        medicalNotes: true,
-        city: {
-          select: {
-            id: true,
-            name: true,
-            country: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            fullname: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    if (!client) {
-      throw new BadRequestException("Client not found");
-    }
-
-    return client;
-  }
-
-  async updateClient(
-    id: number,
-    data: updateClientDto,
-    file: Express.Multer.File
-  ) {
-    const client = await this.prisma.client.findUnique({
-      where: { id },
-    });
-    if (!client) {
-      throw new BadRequestException("Client not found");
-    }
-
-    let image = "";
-    let cityId: number;
-    if (file) {
-      await this.fileService.deleteFile(client.image);
-      image = await handleImageUploads(file, "clients");
-    }
-
-    // get city
-    if (data.cityId) {
-      let city = await this.prisma.city.findUnique({
-        where: { id: Number(data.cityId) },
-        select: { id: true },
-      });
-
-      if (!city) {
-        throw new BadRequestException("City not found");
-      }
-
-      cityId = city.id;
-    } else {
-      cityId = client.cityId;
-    }
-
-    const updatedClient = await this.prisma.client.update({
-      where: { id },
-      data: {
-        image: image ? image : client.image,
-        cityId: cityId,
-        status: data.status ? data.status : client.status,
-        fullname: data.fullname ? data.fullname : client.fullname,
-        phone: data.phone ? data.phone : client.phone,
-        address: data.address ? data.address : client.address,
-        postalCode: data.postalCode ? data.postalCode : client.postalCode,
-        gender: data.gender ? data.gender : client.gender,
-        weight: data.weight ? Number(data.weight) : client.weight,
-        height: data.height ? Number(data.height) : client.height,
-        medicalNotes: data.medicalNotes
-          ? data.medicalNotes
-          : client.medicalNotes,
-      },
-      select: {
-        id: true,
-        fullname: true,
-        email: true,
-        image: true,
-        phone: true,
-        address: true,
-        postalCode: true,
-        status: true,
-        gender: true,
-        weight: true,
-        height: true,
-        medicalNotes: true,
-        city: {
-          select: {
-            id: true,
-            name: true,
-            country: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            fullname: true,
-            email: true,
-          },
-        },
-      },
-    });
-    return updatedClient;
-  }
-
-  async addInjuryToClient(clientId: number, injuryId: number) {
-    // check if client exists
-    const client = await this.prisma.client.findUnique({
-      where: {
-        id: clientId,
-      },
-    });
-
-    if (!client) {
-      throw new BadRequestException("Client not found");
-    }
-
-    // check if injury exists
-    const injury = await this.prisma.injury.findUnique({
-      where: {
-        id: injuryId,
-      },
-    });
-
-    if (!injury) {
-      throw new BadRequestException("Injury not found");
-    }
-
-    // check if client already has this injury and remove if exists
-    const clientInjury = await this.prisma.clientInjury.findFirst({
-      where: {
-        clientId,
-        injuryId,
-      },
-    });
-
-    if (clientInjury) {
-      await this.prisma.clientInjury.delete({
-        where: {
-          clientId_injuryId: {
-            clientId,
-            injuryId,
-          },
-        },
-      });
-
-      return {
-        message: "Injury removed from client",
-      };
-    }
-
-    await this.prisma.clientInjury.create({
-      data: {
-        clientId,
-        injuryId,
-      },
-    });
-
-    return {
-      message: "Injury added to client",
-    };
-  }
-
-  async addDiseaseToClient(clientId: number, diseaseId: number) {
-    // check if client exists
-    const client = await this.prisma.client.findUnique({
-      where: {
-        id: clientId,
-      },
-    });
-
-    if (!client) {
-      throw new BadRequestException("Client not found");
-    }
-
-    // check if disease exists
-    const disease = await this.prisma.disease.findUnique({
-      where: {
-        id: diseaseId,
-      },
-    });
-
-    if (!disease) {
-      throw new BadRequestException("Disease not found");
-    }
-
-    // check if client already has this disease and remove if exists
-    const clientDisease = await this.prisma.clientDisease.findFirst({
-      where: {
-        clientId,
-        diseaseId,
-      },
-    });
-
-    if (clientDisease) {
-      await this.prisma.clientDisease.delete({
-        where: {
-          clientId_diseaseId: {
-            clientId,
-            diseaseId,
-          },
-        },
-      });
-
-      return {
-        message: "Disease removed from client",
-      };
-    }
-
-    await this.prisma.clientDisease.create({
-      data: {
-        clientId,
-        diseaseId,
-      },
-    });
-
-    return {
-      message: "Disease added to client",
-    };
-  }
-
-  async getClientInjuriesAndDiseases(clientId: number, user: any) {
-    const client = await this.prisma.client.findUnique({
-      where: { id: clientId },
-    });
-
-    if (!client) {
-      throw new BadRequestException("Client not found");
-    }
-
-    // Use Promise.all to fetch injuries and diseases concurrently
-    const [injuries, diseases] = await Promise.all([
-      this.prisma.clientInjury.findMany({
-        where: { clientId },
-        select: {
-          injury: { select: { id: true, name: true } },
-        },
-      }),
-      this.prisma.clientDisease.findMany({
-        where: { clientId },
-        select: {
-          disease: { select: { id: true, name: true } },
-        },
-      }),
-    ]);
-
-    // Simplify response mapping
-    const mapResponse = (items: any[], key: string) =>
-      items.map((item) => ({
-        id: item[key].id,
-        name: item[key].name,
-      }));
-
-    return {
-      injuries: mapResponse(injuries, "injury"),
-      diseases: mapResponse(diseases, "disease"),
+      user: { select: { id: true, fullname: true, email: true } },
     };
   }
 }
