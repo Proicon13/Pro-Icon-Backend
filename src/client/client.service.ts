@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma, Role } from "@prisma/client";
+import { Console } from "console";
 import { createClientDto } from "src/dto/createClient.dto";
 import { updateClientDto } from "src/dto/updateClient.dto";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -202,8 +203,10 @@ export class ClientService {
       where: whereClause,
     });
 
+
+
     // Calculate total pages for pagination
-    const totalPages = Math.ceil(clientCount / perPage);
+    const totalPages = Math.ceil(clientCount / take);
 
     // Fetch the clients with pagination and filters
     const clients = await this.prisma.client.findMany({
@@ -213,6 +216,7 @@ export class ClientService {
       select: commonSelect,
       orderBy: orderByList,
     });
+
 
     return {
       clients,

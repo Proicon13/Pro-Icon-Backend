@@ -116,7 +116,7 @@ export class TrainerService {
     });
 
     // Calculate total pages for pagination
-    const totalPages = Math.ceil(trainerCount / perPage);
+    const totalPages = Math.ceil(trainerCount / take);
 
     // Fetch the trainers with pagination and filters
     const trainers = await this.prisma.user.findMany({
