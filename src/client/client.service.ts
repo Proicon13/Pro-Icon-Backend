@@ -203,8 +203,6 @@ export class ClientService {
       where: whereClause,
     });
 
-
-
     // Calculate total pages for pagination
     const totalPages = Math.ceil(clientCount / take);
 
@@ -216,7 +214,6 @@ export class ClientService {
       select: commonSelect,
       orderBy: orderByList,
     });
-
 
     return {
       clients,
@@ -471,6 +468,44 @@ export class ClientService {
 
     return {
       message: "Disease added to client",
+    };
+  }
+
+  async getClientInjuriesAndDiseases(clientId: number, user: any) {
+    const client = await this.prisma.client.findUnique({
+      where: { id: clientId },
+    });
+
+    if (!client) {
+      throw new BadRequestException("Client not found");
+    }
+
+    // Use Promise.all to fetch injuries and diseases concurrently
+    const [injuries, diseases] = await Promise.all([
+      this.prisma.clientInjury.findMany({
+        where: { clientId },
+        select: {
+          injury: { select: { id: true, name: true } },
+        },
+      }),
+      this.prisma.clientDisease.findMany({
+        where: { clientId },
+        select: {
+          disease: { select: { id: true, name: true } },
+        },
+      }),
+    ]);
+
+    // Simplify response mapping
+    const mapResponse = (items: any[], key: string) =>
+      items.map((item) => ({
+        id: item[key].id,
+        name: item[key].name,
+      }));
+
+    return {
+      injuries: mapResponse(injuries, "injury"),
+      diseases: mapResponse(diseases, "disease"),
     };
   }
 }
