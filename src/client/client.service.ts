@@ -109,7 +109,7 @@ export class ClientService {
       postalCode: true,
       status: true,
       gender: true,
-      wheight: true,
+      weight: true,
       height: true,
       medicalNotes: true,
       city: {
