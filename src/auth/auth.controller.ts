@@ -125,5 +125,11 @@ export class AuthController {
     return this.authService.addTrainerByAdmin(userData, adminId);
   }
 
+  @Post("upload-file")
   
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    const path = await handleImageUploads(file,"categories");
+    return path;
+  }
 }
