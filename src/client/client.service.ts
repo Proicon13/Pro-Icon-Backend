@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma, Role } from "@prisma/client";
+import { Strategy } from "passport-jwt";
+import { ClientStrategyDto } from "src/dto/clientStrategy.dto";
 import { createClientDto } from "src/dto/createClient.dto";
 import { updateClientDto } from "src/dto/updateClient.dto";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -164,6 +166,69 @@ export class ClientService {
       diseases: diseases.map(({ disease }) => disease),
     };
   }
+
+  async updateClientStrategy(clientId: number, data: ClientStrategyDto) {
+     await this.ensureClientExists(clientId);
+
+  // check if client has a strategy
+  const strategy = await this.prisma.clientStrategy.findFirst({
+    where: { clientId },
+  });
+
+  let strategyData ;
+
+  if (strategy) {
+    strategyData= await this.prisma.clientStrategy.update({
+      where: { id: strategy.id },
+      data: {
+        targetWeight: parseInt(data.targetWeight)??strategy.targetWeight,
+        muclesMass: parseInt(data.muclesMass)??strategy.muclesMass,
+        boudyFatMass: parseInt(data.boudyFatMass)??strategy.boudyFatMass,
+        trainingType: data.trainingType ?? strategy.trainingType,
+      },
+    });
+  } else {
+    strategyData = await this.prisma.clientStrategy.create({
+      data: {
+        targetWeight: parseInt(data.targetWeight)??strategy.targetWeight,
+        muclesMass: parseInt(data.muclesMass)??  strategy.muclesMass,
+        boudyFatMass: parseInt(data.boudyFatMass)??strategy.boudyFatMass,
+        clientId,
+      },
+    });
+  }
+
+  delete strategyData.clientId;
+  delete strategyData.client;
+  return strategyData;
+}
+
+async getClientStrategy(clientId: number) {
+  await this.ensureClientExists(clientId);
+  const strategy = await this.prisma.clientStrategy.findFirst({
+    where: { clientId },
+    select: {
+      targetWeight: true,
+      muclesMass: true,
+      boudyFatMass: true,
+      trainingType: true,
+    }
+  });
+
+  if (!strategy) {
+    return {
+      targetWeight: 0,
+      muclesMass: 0,
+      boudyFatMass: 0,
+      trainingType: "STATIC",
+    };
+  }
+  return strategy;
+}
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
   // Utility Methods
   private async ensureClientExists(clientId: number) {

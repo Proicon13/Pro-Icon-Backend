@@ -30,6 +30,7 @@ import { updateClientDto } from "src/dto/updateClient.dto";
 import { UpdateClientBodyDto } from "src/dto/updateClientBody.dto";
 import { DeleteResponseDto } from "src/swagger/respnse/user/deleteResponse.dto";
 import { InjuriesAndDiseasesResponseDto } from "src/swagger/respnse/lookups/inguriesAndDiseases.dto";
+import { ClientStrategyDto } from "src/dto/clientStrategy.dto";
 
 @Controller("clients")
 export class ClientController {
@@ -115,5 +116,24 @@ export class ClientController {
   @ApiParam({ name: "clientId", type: Number })
   getClientInjuriesAndDiseases(@Param("clientId") clientId: number, @Req() req) {
     return this.clientService.getClientInjuriesAndDiseases(clientId);
+  }
+
+
+  @Put(":clientId/strategy")
+  @UseGuards(GeneralAuthGuard)
+  @ApiOperation({ summary: "Update a client strategy by ID" })
+  @ApiResponse({ status: 200, description: "Client strategy updated.", type: clientResponseDto })
+  @ApiResponse({ status: 400, description: "Client not found.", type: GlobalErrorResponseDto })
+  @ApiBody({ type: ClientStrategyDto })
+  updateClientStrategy(@Param("clientId") clientId: number, @Body() data: ClientStrategyDto) {
+    return this.clientService.updateClientStrategy(clientId, data);
+  }
+
+  @Get(":clientId/strategy")
+  @UseGuards(GeneralAuthGuard)
+  @ApiOperation({ summary: "Get a client strategy by ID" })
+  @ApiResponse({ status: 200, description: "Client strategy fetched.", type: ClientStrategyDto })
+  getClientStrategy(@Param("clientId") clientId: number) {
+    return this.clientService.getClientStrategy(clientId);
   }
 }

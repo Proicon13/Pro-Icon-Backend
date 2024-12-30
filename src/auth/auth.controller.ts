@@ -126,7 +126,6 @@ export class AuthController {
   }
 
   @Post("upload-file")
-  
   @UseInterceptors(FileInterceptor("file"))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     const path = await handleImageUploads(file,"categories");

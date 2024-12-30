@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CityResponseDto } from "../lookups/city.dto";
+import { ClientStrategyDto } from "src/dto/clientStrategy.dto";
 
 class userRes {
   @ApiProperty({ description: "The unique identifier of the user" })
@@ -78,4 +79,5 @@ export class clientResponseDto {
 
   @ApiProperty({ description: "The medical notes of the client" })
   medicalNotes: string;
+
 }

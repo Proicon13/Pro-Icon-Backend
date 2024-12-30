@@ -83,30 +83,32 @@ model Program {
 }
 
 model Client {
-  id           Int             @id @default(autoincrement()) // Auto-increment ID
+  id           Int              @id @default(autoincrement()) // Auto-increment ID
   fullname     String
-  email        String          @unique
+  email        String           @unique
   phone        String?
   address      String?
   postalCode   String?
   image        String?
-  isDeleted    Boolean         @default(false)
-  isBlocked    Boolean         @default(false)
-  status       Status          @default(ACTIVE)
-  gender       Gender          @default(MALE)
+  isDeleted    Boolean          @default(false)
+  isBlocked    Boolean          @default(false)
+  status       Status           @default(ACTIVE)
+  gender       Gender           @default(MALE)
   weight       Float?
   height       Float?
   medicalNotes String?
   startDate    DateTime?
   endDate      DateTime?
   cityId       Int
-  city         City            @relation(fields: [cityId], references: [id]) // Linking to City
+  city         City             @relation(fields: [cityId], references: [id]) // Linking to City
   injuries     ClientInjury[] // Many-to-many with Injury lookup table
   diseases     ClientDisease[] // Many-to-many with Disease lookup table
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  user         User?           @relation(fields: [userId], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  user         User?            @relation(fields: [userId], references: [id])
   userId       Int?
+  strategyId   Int?
+  strategy     ClientStrategy[]
 }
 
 model Injury {
@@ -148,6 +150,16 @@ model ClientDisease {
   @@id([clientId, diseaseId])
 }
 
+model ClientStrategy {
+  id           Int          @id @default(autoincrement())
+  clientId     Int
+  client       Client       @relation(fields: [clientId], references: [id])
+  trainingType TrainingType @default(STATIC)
+  targetWeight Float?
+  muclesMass   Float?
+  boudyFatMass Float?
+}
+
 enum Role {
   MANAGER
   ADMIN
@@ -162,4 +174,10 @@ enum Status {
 enum Gender {
   MALE
   FEMALE
+}
+
+enum TrainingType {
+  STATIC
+  DYNAMIC
+  POWER
 }

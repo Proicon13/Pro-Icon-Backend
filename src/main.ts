@@ -5,7 +5,7 @@ import { ValidationPipe } from "@nestjs/common";
 import * as dotenv from "dotenv";
 import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
 import * as morgan from "morgan";
-import { insertDiseases, insertInjuries } from "./utils/pushCities";
+import { insertDiseases, insertInjuries, puchCategories, pushCities } from "./utils/pushCities";
 dotenv.config();
 
 async function bootstrap() {
