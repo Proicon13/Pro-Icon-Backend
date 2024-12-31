@@ -26,9 +26,6 @@ export class UserResponseDto {
   @ApiProperty({ description: "The phone number of the user" })
   phone: string;
 
-  @ApiProperty({ description: "The status of the user" })
-  status: string;
-
   @ApiProperty({
     description: "The role of the user",
     enum: ["MANAGER", "ADMIN","TRAINER"],
