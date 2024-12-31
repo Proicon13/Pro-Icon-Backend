@@ -89,6 +89,7 @@ export class TrainerService {
     }
 
     whereClause.role = Role.TRAINER;
+    whereClause.isDeleted = false;
 
     if (orderBy) {
       if (orderBy === "ALPHA-ASC") {
