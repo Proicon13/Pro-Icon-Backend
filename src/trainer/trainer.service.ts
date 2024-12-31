@@ -20,8 +20,8 @@ export class TrainerService {
     searchKey,
     orderBy
   ) {
-    const skip = ((page || 1) - 1) * (perPage || 10);
-    const take = Number(perPage || 10);
+    const skip = ((page || 1) - 1) * (perPage || 5);
+    const take = Number(perPage || 5);
 
     if (role !== Role.ADMIN && role !== Role.MANAGER) {
       throw new BadRequestException(

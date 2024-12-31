@@ -54,8 +54,8 @@ export class ClientService {
   }
 
   async getAllClients(userId: number, user: any, page, perPage, searchKey, orderBy) {
-    const skip = ((page || 1) - 1) * (perPage || 10);
-    const take = Number(perPage || 10);
+    const skip = ((page || 1) - 1) * (perPage || 5);
+    const take = Number(perPage || 5);
 
     const whereClause = await this.buildWhereClause(userId, user, searchKey);
     const orderByList = this.getOrderByList(orderBy);
