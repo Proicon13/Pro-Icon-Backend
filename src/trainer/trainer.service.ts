@@ -136,7 +136,7 @@ export class TrainerService {
 
   async getTrainerById(id: number) {
     const trainer = await this.prisma.user.findUnique({
-      where: { id, role: Role.TRAINER },
+      where: { id, role: Role.TRAINER, isDeleted: false },
       select: {
         id: true,
         fullname: true,
@@ -175,7 +175,7 @@ export class TrainerService {
     file: Express.Multer.File
   ) {
     const trainer = await this.prisma.user.findUnique({
-      where: { id, role: Role.TRAINER },
+      where: { id, role: Role.TRAINER ,isDeleted: false },
     });
     if (!trainer) {
       throw new BadRequestException("trainer not found");
