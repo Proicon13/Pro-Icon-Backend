@@ -17,7 +17,6 @@ import { MailService } from "src/mail/mail.service";
   ],
   providers: [
     AuthService,
-    UserService,
     PrismaService, // PrismaService for database interaction
     MailService,
   ],

@@ -2,17 +2,17 @@
 
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Prisma } from "@prisma/client";
 import { JwtService } from "@nestjs/jwt";
 import { UpdateUserDto } from "src/dto/updateUser.dto";
 import { handleImageUploads } from "src/utils/saveImage";
+import { FileService } from "src/utils/fileService";
 
 @Injectable()
 export class UserService {
-  fileService: any;
+  
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService
+    private fileService: FileService
   ) {}
 
   // Find all users
@@ -74,7 +74,6 @@ export class UserService {
            phone: true,
            address: true,
            postalCode: true,
-           status: true,
            role: true,
    
            city: {

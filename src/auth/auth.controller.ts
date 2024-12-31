@@ -1,8 +1,6 @@
 import { Body, Controller, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { PrismaService } from "src/prisma/prisma.service";
 import {
-  ApiBasicAuth,
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
@@ -25,7 +23,6 @@ import { AdminAuthGuard } from "src/guards/AdminAuthGuard";
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly prisma: PrismaService
   ) {}
 
   @Post("register")

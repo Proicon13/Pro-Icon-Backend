@@ -27,6 +27,7 @@ import {
 import { GlobalErrorResponseDto } from "src/swagger/respnse/lookups/globalError.dto";
 import { UserResponseDto } from "src/swagger/respnse/user/createUser.dto";
 import { GeneralAuthGuard } from "src/guards/GeneralAuthGuard";
+import { UpdateUserBodyDto } from "src/swagger/respnse/user/updateUserBody.dto";
 
 @Controller("users")
 export class UserController {
@@ -41,7 +42,7 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
-  @Put(":id")
+  @Put("")
   @UseGuards(GeneralAuthGuard)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
@@ -56,7 +57,7 @@ export class UserController {
     description: "The user not found.",
     type: GlobalErrorResponseDto,
   })
-  @ApiBody({ type: UpdateUserDto })
+  @ApiBody({ type: UpdateUserBodyDto })
   async updateUser(
     @Body() userData: UpdateUserDto,
     @Req() req,
