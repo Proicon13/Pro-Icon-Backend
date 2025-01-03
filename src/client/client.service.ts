@@ -347,7 +347,7 @@ async getClientStrategy(clientId: number) {
       weight: true,
       height: true,
       medicalNotes: true,
-      birthdate: true,
+      birthDate: true,
       city: {
         select: {
           id: true,
