@@ -282,6 +282,7 @@ async getClientStrategy(clientId: number) {
       weight: data.weight ? Number(data.weight) : client.weight,
       height: data.height ? Number(data.height) : client.height,
       medicalNotes: data.medicalNotes ?? client.medicalNotes,
+      birthDate: data.birthDate ?? client.birthDate,
     };
   }
 
