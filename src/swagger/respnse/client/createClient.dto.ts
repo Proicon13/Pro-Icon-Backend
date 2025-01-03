@@ -80,4 +80,17 @@ export class clientResponseDto {
   @ApiProperty({ description: "The medical notes of the client" })
   medicalNotes: string;
 
+
+  @ApiProperty({
+    description: "The start date for the client in yyyy-mm-dd format",
+    example: "2023-12-31",
+
+    required: false,
+    format: "date",
+    type: Date,
+  })
+  birthDate: Date;
+
+
+
 }

@@ -102,4 +102,22 @@ export class createClientDto {
   @IsNumberString()
   @ApiProperty({ description: "The height of the client" })
   height: string;
+
+
+
+  @IsOptional()
+  @IsDate()
+  @Transform(({ value }) => {
+    if (!value) return value; 
+    console.log("Value:", typeof value);
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day + 1); // Convert to Date object
+  })
+  @ApiProperty({
+    description: "The birthdate for the client in yyyy-mm-dd format",
+    example: "2023-12-31",
+    required: false,
+  })
+
+  birthDate: Date;
 }

@@ -108,6 +108,7 @@ model Client {
   user         User?            @relation(fields: [userId], references: [id])
   userId       Int?
   strategyId   Int?
+  birthDate    DateTime?
   strategy     ClientStrategy[]
 }
 
